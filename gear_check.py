@@ -62,10 +62,17 @@ with open("cataclysm/items.json", "r") as f:
     item_cache = json.load(f)
     print(f"Loaded {len(item_cache)} items from cache")
 
-enchants = requests.get('https://raw.githubusercontent.com/fuantomu/envy-armory/main/enchants.json').json()
-print(f"Loaded {sum([len(enchants[slot]) for slot in enchants])} enchants")
+enchants = {}
+def load_enchants():
+    try:
+        enchants = requests.get('https://raw.githubusercontent.com/fuantomu/envy-armory/main/enchants.json').json()
+        print(f"Loaded {sum([len(enchants[slot]) for slot in enchants])} enchants")
+    except:
+        print("ERROR: Could not load enchants")
+load_enchants()
 
 def check_gear(gear, zone, spec):
+    load_enchants()
     output = {
         "minor": "",
         "major": "",
