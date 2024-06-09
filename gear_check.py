@@ -62,10 +62,8 @@ with open("cataclysm/items.json", "r") as f:
     item_cache = json.load(f)
     print(f"Loaded {len(item_cache)} items from cache")
 
-enchants = {}
-with open("cataclysm/enchants.json", "r") as f:
-    enchants = json.load(f)
-    print(f"Loaded {sum([len(enchants[slot]) for slot in enchants])} enchants")
+enchants = requests.get('https://raw.githubusercontent.com/fuantomu/envy-armory/main/enchants.json').json()
+print(f"Loaded {sum([len(enchants[slot]) for slot in enchants])} enchants")
 
 def check_gear(gear, zone, spec):
     output = {
@@ -73,8 +71,7 @@ def check_gear(gear, zone, spec):
         "major": "",
         "extreme": ""
     }
-    
-    sockets = {0 : 0, 1: 0, 2: 0}
+    sockets = {0:0,1:0,2:0}
     meta = None
     for item in gear:
         if item["slot"] in ignore_slots or item["id"] == 0:
@@ -97,20 +94,28 @@ def check_gear(gear, zone, spec):
                             output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a very low level enchant: {enchant['name']}\n"
                         if enchant["tier"] == 1:
                             output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level enchant: {enchant['name']}\n"
+                        
+                        unsuited_enchant_found = False
                         if enchant.get("role") is not None:
-                            if spec not in roles[enchant["role"]]:
+                            if spec not in roles[enchant["role"]] and spec != enchant.get("spec"):
+                                unsuited_enchant_found = True
                                 output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has an enchant that is not suited for their role ({spec}): {enchant['name']} ({enchant['role']})\n"
-                        if enchant.get("type") is not None:
-                            if spec not in class_types[enchant["type"]]:
+                        if enchant.get("type") is not None and not unsuited_enchant_found:
+                            if spec not in class_types[enchant["type"]] and spec != enchant.get("spec"):
                                 output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has an enchant that is not suited for their type ({spec}): {enchant['name']} ({enchant['type']})\n"
                 if not found_enchant:
                     output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) has an incorrect enchant (Unknown enchant or low level)\n"
+                    with open(f"unknown_enchants","a") as f:
+                        f.write(f"\n{slots[item['slot']]}\n")
+                        f.write(f'{str(item["permanentEnchant"])} - {str(item["permanentEnchantName"])}')
                 
             
         if item["slot"] == 5 and item.get("onUseEnchant") != 4223: # Nitro Boots
             output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing Nitro Boots\n"
-        if item["slot"] == 9 and item.get("onUseEnchant") != 4179 : # Synapse Springs
+        if item["slot"] == 9 and item.get("onUseEnchant") != 4179 and spec not in ["Guardian","Blood","Protection"] : # Synapse Springs
             output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing Synapse Springs\n"
+        elif item["slot"] == 9 and item.get("onUseEnchant") != 4180 and spec in ["Guardian","Blood","Protection"] : # Quickflip Deflection Plates
+            output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing Quickflip Deflection Plates\n"
 
         if item["slot"] == 5 and len(item.get("gems", [])) < item_stats.get("nsockets", 0)+1:
             output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing a belt buckle\n"
@@ -121,7 +126,7 @@ def check_gear(gear, zone, spec):
             if any([gem["itemLevel"] < 85 for gem in item["gems"]]):
                 output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level gem\n"
             for gem in item["gems"]:
-                if "meta" in item["gems"][0]["icon"]:
+                if "meta" in gem["icon"]:
                     continue
                 gem_stats = get_wowhead_item(gem["id"])
                 if gem_stats["color"] != 10 :
@@ -134,7 +139,7 @@ def check_gear(gear, zone, spec):
     if meta is None:
         output["extreme"] += f"No meta gem\n"
     else:
-        if any([sockets.get(int(k),0) < v for k,v in meta["meta"].items()]):
+        if any([sockets[int(k)] < v for k,v in meta["meta"].items()]):
             output["extreme"] += f"Meta gem is not active!\n"
             
     with open("cataclysm/items.json", "w") as f:
@@ -158,9 +163,9 @@ def get_wowhead_item(id):
                 for entry in requirements:
                     if "Red" in entry:
                         parsed_item["meta"][0] = int(re.findall(r'([0-9])', entry)[0])
-                    elif "Yellow" in entry:
-                        parsed_item["meta"][1] = int(re.findall(r'([0-9])', entry)[0])
                     elif "Blue" in entry:
+                        parsed_item["meta"][1] = int(re.findall(r'([0-9])', entry)[0])
+                    elif "Yellow" in entry:
                         parsed_item["meta"][2] = int(re.findall(r'([0-9])', entry)[0])
             else:
                 parsed_item["color"] = int(parsed_xml["wowhead"]["item"]["subclass"]['@id'])
