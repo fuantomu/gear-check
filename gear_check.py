@@ -65,6 +65,7 @@ with open("cataclysm/items.json", "r") as f:
 enchants = {}
 def load_enchants():
     try:
+        global enchants
         enchants = requests.get('https://raw.githubusercontent.com/fuantomu/envy-armory/main/enchants.json').json()
         print(f"Loaded {sum([len(enchants[slot]) for slot in enchants])} enchants")
     except:
@@ -72,7 +73,6 @@ def load_enchants():
 load_enchants()
 
 def check_gear(gear, zone, spec):
-    load_enchants()
     output = {
         "minor": "",
         "major": "",
@@ -128,7 +128,7 @@ def check_gear(gear, zone, spec):
             output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing a belt buckle\n"
         
         if item.get("gems") is not None:
-            if item["slot"] == 0 and "meta" in item["gems"][0]["icon"]:
+            if item["slot"] == 0 and item.get("meta") is not None:
                 meta = get_wowhead_item(item["gems"][0]["id"])
             if any([gem["itemLevel"] < 85 for gem in item["gems"]]):
                 output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level gem\n"
