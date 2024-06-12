@@ -128,12 +128,11 @@ def check_gear(gear, zone, spec):
             output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing a belt buckle\n"
         
         if item.get("gems") is not None:
-            if item["slot"] == 0 and item.get("meta") is not None:
-                meta = get_wowhead_item(item["gems"][0]["id"])
             if any([gem["itemLevel"] < 85 for gem in item["gems"]]):
                 output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level gem\n"
             for gem in item["gems"]:
                 if "meta" in gem["icon"]:
+                    meta = get_wowhead_item(gem["id"])
                     continue
                 gem_stats = get_wowhead_item(gem["id"])
                 if gem_stats["color"] != 10 :
