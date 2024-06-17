@@ -218,8 +218,10 @@ def check_gear(gear, zone, spec):
             if profession[0] == "tailoring" and profession[1]['found'] < 2:
                 output["extreme"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
     
-    if len(total_professions) < 2:
+    if len(total_professions) == 1:
         output["extreme"] += f"Only one primary profession bonus found: {','.join(total_professions)}\n"
+    elif len(total_professions) == 0:
+        output["extreme"] += f"No primary profession bonus found\n"
 
     if meta is None:
         output["extreme"] += f"No meta gem\n"
