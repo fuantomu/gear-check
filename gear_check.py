@@ -202,19 +202,20 @@ def check_gear(gear, zone, spec):
     total_professions = [profession[0].capitalize() for profession in professions.items() if profession[1]["found"] > 0]
     for profession in professions.items():
         if profession[1]['found'] > 0:
-            if profession[0] == "enchanting" and profession[1]['found'] != 2:
+            if profession[0] == "enchanting" and profession[1]['found'] < 2:
+                print(profession[1])
                 output["extreme"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing enchanting-specific enchant\n"
-            if profession[0] == "blacksmithing" and profession[1]['found'] != 2:
+            if profession[0] == "blacksmithing" and profession[1]['found'] < 2:
                 output["extreme"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing blacksmithing socket\n"
-            if profession[0] == "jewelcrafting" and profession[1]['found'] != 3:
+            if profession[0] == "jewelcrafting" and profession[1]['found'] < 3:
                 item_text = ','.join([f"{found_item.get('name', '')} ({slots[profession[1]['items'][0]['slot']]})" for found_item in profession[1]['items']])
                 output["extreme"] += f"{item_text} missing {3-profession[1]['found']} jewelcrafting gems\n"
-            if profession[0] == "engineering" and profession[1]['found'] != 2:
+            if profession[0] == "engineering" and profession[1]['found'] < 2:
                 item_text = ','.join([f"{found_item.get('name', '')} ({slots[profession[1]['items'][0]['slot']]})" for found_item in profession[1]['items']])
                 output["extreme"] += f"{item_text} missing engineering enchants\n"
-            if profession[0] == "leatherworking" and profession[1]['found'] != 2:
+            if profession[0] == "leatherworking" and profession[1]['found'] < 2:
                 output["extreme"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing leatherworking enchant\n"
-            if profession[0] == "tailoring" and profession[1]['found'] != 2:
+            if profession[0] == "tailoring" and profession[1]['found'] < 2:
                 output["extreme"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
     
     if len(total_professions) < 2:
