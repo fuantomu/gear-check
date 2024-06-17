@@ -16,7 +16,7 @@ bot = commands.Bot()
 @bot.slash_command(
   name="cutsheet",
   description="Process warcraftlogs report to a new cut sheet",
-  guild_ids=[os.getenv('GUILD_ID')]
+  guild_ids=os.getenv('GUILD_IDS').split(",")
 )
 async def cutsheet(ctx, arg):
     await ctx.defer()
@@ -29,14 +29,15 @@ async def cutsheet(ctx, arg):
         spreadsheet_id, sheet_id = create_sheet(log, gear_log, "Cuts")
     except Exception as e:
         await ctx.respond(f'An error occurred during sheet creation: {str(e)}')
-        return
+        raise
     
     await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}')
+    return
     
 @bot.slash_command(
   name="gearcheck",
   description="Process warcraftlogs report to check player gear",
-  guild_ids=[os.getenv('GUILD_ID')]
+  guild_ids=os.getenv('GUILD_IDS').split(",")
 )
 async def gearcheck(ctx, arg):
     await ctx.defer()
@@ -49,9 +50,10 @@ async def gearcheck(ctx, arg):
         spreadsheet_id = create_gear_sheet(log, gear_log)
     except Exception as e:
         await ctx.respond(f'An error occurred during sheet creation: {str(e)}')
-        return
+        raise
     
     await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
+    return
 
 warcraft_logs_url = 'https://www.warcraftlogs.com:443/v1/report/'
 def get_log(report:str):
