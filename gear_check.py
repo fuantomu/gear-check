@@ -99,7 +99,7 @@ def check_gear(gear, zone, spec):
         item_stats = get_wowhead_item(item["id"])
         
         if item["itemLevel"] < zone_min_itemlevel[zone]:
-            output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is <346\n"
+            output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is < {zone_min_itemlevel[zone]}\n"
         
         # Check if resilience rating on gem
         if "resirtng" in item_stats.keys():
