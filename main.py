@@ -23,12 +23,12 @@ async def cutsheet(ctx, arg):
     log = get_log(arg)
     gear_log = get_log_summary(arg)
     if len(log.get("exportedCharacters", [])) == 0:
-        await ctx.respond(log.get('error'))
+        await ctx.followup.send(log.get('error'))
         return
     try:
         spreadsheet_id, sheet_id = create_sheet(log, gear_log, "Cuts")
     except Exception as e:
-        await ctx.respond(f'An error occurred during sheet creation: {str(e)}')
+        await ctx.followup.send(f'An error occurred during sheet creation: {str(e)}')
         raise
     
     await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}')
@@ -44,12 +44,12 @@ async def gearcheck(ctx, arg):
     log = get_log(arg)
     gear_log = get_log_summary(arg)
     if len(log.get("exportedCharacters", [])) == 0:
-        await ctx.respond(log.get('error', "Unknown error"))
+        await ctx.followup.send(log.get('error', "Unknown error"))
         return
     try:
         spreadsheet_id = create_gear_sheet(log, gear_log)
     except Exception as e:
-        await ctx.respond(f'An error occurred during sheet creation: {str(e)}')
+        await ctx.followup.send(f'An error occurred during sheet creation: {str(e)}')
         raise
     
     await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
@@ -222,7 +222,7 @@ def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"
             {
                 'range': f"{sheet_title}!B1",
                 'majorDimension': "COLUMNS",
-                'values': [["Potions used"]]
+                'values': [["Potions"]]
             },
             {
                 'range': f'{sheet_title}!B2',
@@ -232,7 +232,7 @@ def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"
             {
                 'range': f"{sheet_title}!C1",
                 'majorDimension': "COLUMNS",
-                'values': [["Healthstones used"]]
+                'values': [["Healthstones"]]
             },
             {
                 'range': f'{sheet_title}!C2',
@@ -273,11 +273,62 @@ def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"
     }
     service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body=batch_update_values_request_body).execute()
     
+    update_class_color(service, spreadsheetId, players)
     update_background_color(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 3, "column_end": 4}, {"red": 1, "green": 1, "blue": 0})
     update_background_color(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 4, "column_end": 5}, {"red": 1, "green": 0.6, "blue": 0})
     update_background_color(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 5, "column_end": 6}, {"red": 0.918, "green": 0.3412, "blue": 0.3412})
     update_cell_width(service, spreadsheetId)
     update_wrap(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 1, "column_end": 6})
+    update_text_format(service, spreadsheetId, {"row_start": 0, "row_end": 1+len(players), "column_start": 0, "column_end": 6})
+    update_alignment(service, spreadsheetId, {"row_start": 0, "row_end": 1, "column_start": 0, "column_end": 6})
+    update_alignment(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 0, "column_end": 3})
+
+def update_class_color(service, spreadsheetId, players):
+    class_colors = {
+        "Warrior": {"red": 198, "green": 155, "blue": 109},
+        "Hunter": {"red": 170, "green": 211, "blue": 114},
+        "Warlock": {"red": 135, "green": 136, "blue": 238},
+        "Druid": {"red": 255, "green": 124, "blue": 10},
+        "Mage": {"red": 63, "green": 199, "blue": 235},
+        "Rogue": {"red": 252, "green": 252, "blue": 2},
+        "Priest": {"red": 255, "green": 255, "blue": 254},
+        "Shaman": {"red": 31, "green": 105, "blue": 235},
+        "Paladin": {"red": 244, "green": 140, "blue": 186},
+        "DeathKnight": {"red": 196, "green": 30, "blue": 58}
+    }
+    request_body = [
+        {
+            "repeatCell":{
+                "cell":
+                {
+                    "userEnteredFormat":
+                    {
+                        "backgroundColor":
+                        {
+                            "red": class_colors[player["type"]].get("red",255)/255,
+                            "green": class_colors[player["type"]].get("green",255)/255,
+                            "blue": class_colors[player["type"]].get("blue",255)/255
+                        }
+                    }
+                },
+                "fields":"userEnteredFormat.backgroundColor",
+                "range":{
+                    "sheetId": 0,
+                    "startRowIndex": index+1,
+                    "endRowIndex": index+2,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": 1
+                }
+            }
+        }
+        for index,player in enumerate(players)
+    ]
+
+    body = {
+        "requests": request_body
+    }
+
+    service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 def update_background_color(service, spreadsheetId, range, color):
     request_body = {
@@ -313,12 +364,12 @@ def update_background_color(service, spreadsheetId, range, color):
     
 def update_cell_width(service, spreadsheetId):
     column_widths = [
-        {"columnNumber": 1, "width": 200},
-        {"columnNumber": 2, "width": 80},
-        {"columnNumber": 3, "width": 150},
-        {"columnNumber": 4, "width": 850},
-        {"columnNumber": 5, "width": 500},
-        {"columnNumber": 6, "width": 650},
+        {"columnNumber": 1, "width": 180},
+        {"columnNumber": 2, "width": 120},
+        {"columnNumber": 3, "width": 120},
+        {"columnNumber": 4, "width": 600},
+        {"columnNumber": 5, "width": 600},
+        {"columnNumber": 6, "width": 600},
     ]
     request_body = [
         {
@@ -360,6 +411,89 @@ def update_wrap(service, spreadsheetId, range):
                     }
                 ,
                 "fields": "userEnteredFormat.wrapStrategy"
+            }
+        }
+    ]
+
+    body = {
+        "requests": request_body
+    }
+    service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
+    
+def update_text_format(service, spreadsheetId, range):
+    request_body = [
+        {
+            "repeatCell": {
+                "range":{
+                    "sheetId": 0,
+                    "startRowIndex": range.get("row_start",0),
+                    "endRowIndex": range.get("row_end",range.get("row_start",0)+1),
+                    "startColumnIndex": range.get("column_start",0),
+                    "endColumnIndex": range.get("column_end",0)
+                },
+                "cell": 
+                    {
+                        "textFormatRuns": [{
+                            "startIndex": 0,
+                            "format": {
+                                "fontFamily": "Roboto"
+                            }
+                        }]
+                    }
+                ,
+                "fields": "textFormatRuns"
+            }
+        },
+        {
+            "repeatCell": {
+                "range":{
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": 1,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": 6
+                },
+                "cell": 
+                    {
+                        "textFormatRuns": [{
+                            "startIndex": 0,
+                            "format": {
+                                "bold": True,
+                                "fontSize": 14
+                            }
+                        }]
+                    }
+                ,
+                "fields": "textFormatRuns"
+            }
+        }
+    ]
+
+    body = {
+        "requests": request_body
+    }
+    service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
+    
+def update_alignment(service, spreadsheetId, range):
+    request_body = [
+        {
+            "repeatCell": {
+                "range":{
+                    "sheetId": 0,
+                    "startRowIndex": range.get("row_start",0),
+                    "endRowIndex": range.get("row_end",range.get("row_start",0)+1),
+                    "startColumnIndex": range.get("column_start",0),
+                    "endColumnIndex": range.get("column_end",0)
+                },
+                "cell": 
+                    {
+                        "userEnteredFormat": {
+                            "horizontalAlignment": "CENTER",
+                            "verticalAlignment": "MIDDLE"
+                        }
+                    }
+                ,
+                "fields": "userEnteredFormat.horizontalAlignment,userEnteredFormat.verticalAlignment"
             }
         }
     ]
