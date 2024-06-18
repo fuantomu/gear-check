@@ -228,12 +228,10 @@ def check_gear(gear, zone, spec):
         
         # Find alchemy trinket
         if item["slot"] in [12,13]:
-            print(item["id"])
             if item["id"] in [58483,68775,68776,68777]:
                 professions["alchemy"]["found"] +=1
 
     total_professions = [profession[0].capitalize() for profession in professions.items() if profession[1]["found"] > 0]
-    print(professions["alchemy"])
     for profession in professions.items():
         if profession[1]['found'] > 0:
             if profession[0] == "enchanting" and profession[1]['found'] < 2:
