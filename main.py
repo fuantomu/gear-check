@@ -22,9 +22,6 @@ async def cutsheet(ctx, arg):
     await ctx.defer()
     log = get_log(arg)
     gear_log = get_log_summary(arg)
-    if len(log.get("exportedCharacters", [])) == 0:
-        await ctx.followup.send(log.get('error'))
-        return
     try:
         spreadsheet_id, sheet_id = create_sheet(log, gear_log, "Cuts")
     except Exception as e:
@@ -32,7 +29,6 @@ async def cutsheet(ctx, arg):
         raise
     
     await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}')
-    return
     
 @bot.slash_command(
   name="gearcheck",
@@ -43,9 +39,6 @@ async def gearcheck(ctx, arg):
     await ctx.defer()
     log = get_log(arg)
     gear_log = get_log_summary(arg)
-    if len(log.get("exportedCharacters", [])) == 0:
-        await ctx.followup.send(log.get('error', "Unknown error"))
-        return
     try:
         spreadsheet_id = create_gear_sheet(log, gear_log)
     except Exception as e:
@@ -53,7 +46,6 @@ async def gearcheck(ctx, arg):
         raise
     
     await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
-    return
 
 warcraft_logs_url = 'https://www.warcraftlogs.com:443/v1/report/'
 def get_log(report:str):
