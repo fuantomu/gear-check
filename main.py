@@ -98,7 +98,7 @@ def create_sheet(log, gear_log, sheet_title):
         copy_sheet = service.spreadsheets().sheets().copyTo(spreadsheetId = os.getenv("SOURCE_SPREADSHEET"), sheetId=os.getenv("SOURCE_SHEET"),body={"destinationSpreadsheetId": spreadsheet.get('spreadsheetId')}).execute()
         service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet.get('spreadsheetId'), body={"requests": [{"updateSheetProperties":{ "properties": {"sheetId": copy_sheet.get('sheetId'), "title": sheet_title}, "fields": "title"}}]}).execute()
         update_sheet(service, spreadsheet.get('spreadsheetId'), sheet_title, log)
-        update_gear_sheet(service, spreadsheet.get('spreadsheetId'), gear_log, log.get("zone"), sheet_title="Gear")
+        update_gear_sheet(service, spreadsheet.get('spreadsheetId'), gear_log, log.get("zone"), sheet_title="Sheet1")
         
         # Connect to Google Drive and make spreadsheet public
         drive_client = build('drive', 'v3', credentials=creds)
