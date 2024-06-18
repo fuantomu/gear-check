@@ -277,6 +277,7 @@ def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"
     update_background_color(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 4, "column_end": 5}, {"red": 1, "green": 0.6, "blue": 0})
     update_background_color(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 5, "column_end": 6}, {"red": 0.918, "green": 0.3412, "blue": 0.3412})
     update_cell_width(service, spreadsheetId)
+    update_wrap(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 1, "column_end": 6})
 
 def update_background_color(service, spreadsheetId, range, color):
     request_body = {
@@ -339,5 +340,35 @@ def update_cell_width(service, spreadsheetId):
         "requests": request_body
     }
     service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
+    
+def update_wrap(service, spreadsheetId, range):
+    request_body = [
+        {
+            "repeatCell": {
+                "range":{
+                    "sheetId": 0,
+                    "startRowIndex": range.get("row_start",0),
+                    "endRowIndex": range.get("row_end",range.get("row_start",0)+1),
+                    "startColumnIndex": range.get("column_start",0),
+                    "endColumnIndex": range.get("column_end",0)
+                },
+                "cell": 
+                    {
+                        "userEnteredFormat": {
+                            "wrapStrategy": "WRAP"
+                        }
+                    }
+                ,
+                "fields": "userEnteredFormat.wrapStrategy"
+            }
+        }
+    ]
+
+    body = {
+        "requests": request_body
+    }
+    service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 bot.run(os.getenv('BOT_TOKEN'))
+
+#update_gear_sheet(None,None, get_log_summary("Zr9jbDgwaMvAH2Yn"), get_log("Zr9jbDgwaMvAH2Yn").get("zone"))
