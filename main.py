@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
@@ -8,6 +9,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from gear_check import check_gear
+import sys
 load_dotenv(override=True)
 
 scopes = ["https://www.googleapis.com/auth/spreadsheets",'https://www.googleapis.com/auth/drive','https://www.googleapis.com/auth/drive.metadata','https://www.googleapis.com/auth/drive.file',]
@@ -21,14 +23,13 @@ bot = commands.Bot()
 async def cutsheet(ctx, arg):
     await ctx.defer()
     log = get_log(arg)
-    gear_log = get_log_summary(arg)
-    try:
+    if log.get("error") is not None:
+        await ctx.followup.send(log["error"])
+    else:
+        gear_log = get_log_summary(arg)
         spreadsheet_id, sheet_id = create_sheet(log, gear_log, "Cuts")
-    except Exception as e:
-        await ctx.followup.send(f'An error occurred during sheet creation: {str(e)}')
-        raise
-    
-    await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}')
+        
+        await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}')
     
 @bot.slash_command(
   name="gearcheck",
@@ -38,14 +39,20 @@ async def cutsheet(ctx, arg):
 async def gearcheck(ctx, arg):
     await ctx.defer()
     log = get_log(arg)
-    gear_log = get_log_summary(arg)
-    try:
+
+    if log.get("error") is not None:
+        await ctx.followup.send(log["error"])
+    else:
+        gear_log = get_log_summary(arg)
         spreadsheet_id = create_gear_sheet(log, gear_log)
-    except Exception as e:
-        await ctx.followup.send(f'An error occurred during sheet creation: {str(e)}')
-        raise
-    
-    await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
+        
+        await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
+
+@gearcheck.error
+@cutsheet.error
+async def on_application_command_error(ctx: discord.ApplicationContext, error: discord.DiscordException):
+    await ctx.followup.send(f'An error occurred during sheet creation: {error}')
+    raise error  # Here we raise other errors to ensure they aren't ignored
 
 warcraft_logs_url = 'https://www.warcraftlogs.com:443/v1/report/'
 def get_log(report:str):
@@ -111,7 +118,6 @@ def create_sheet(log, gear_log, sheet_title):
         return spreadsheet.get('spreadsheetId'), copy_sheet.get('sheetId')
     except HttpError as error:
         print(f"An error occurred: {error}")
-        raise
     
 def create_gear_sheet(log, gear_log):
     creds = get_creds()
@@ -145,7 +151,6 @@ def create_gear_sheet(log, gear_log):
         return spreadsheet.get('spreadsheetId')
     except HttpError as error:
         print(f"An error occurred: {error}")
-        raise
     
 def update_sheet(service, spreadsheetId, sheet_title, log):
     batch_update_values_request_body = {
@@ -263,7 +268,11 @@ def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"
             }
         ]
     }
-    service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body=batch_update_values_request_body).execute()
+    
+    try:
+        service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body=batch_update_values_request_body).execute()
+    except:
+        return zip([player["name"] for player in players], gear_issues)
     
     update_class_color(service, spreadsheetId, players)
     update_background_color(service, spreadsheetId, {"row_start": 1, "row_end": 1+len(players), "column_start": 3, "column_end": 4}, {"red": 1, "green": 1, "blue": 0})
@@ -495,6 +504,15 @@ def update_alignment(service, spreadsheetId, range):
     }
     service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
-bot.run(os.getenv('BOT_TOKEN'))
-
-#update_gear_sheet(None,None, get_log_summary("Zr9jbDgwaMvAH2Yn"), get_log("Zr9jbDgwaMvAH2Yn").get("zone"))
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Running discord bot")
+        bot.run(os.getenv('BOT_TOKEN'))
+    else:
+        issues = update_gear_sheet(None,None, get_log_summary(sys.argv[1]), get_log(sys.argv[1]).get("zone"))
+        for issue in issues:
+            print("###################################################")
+            print(f"{issue[0]}\n")
+            print(f"Minor:\n{issue[1]['minor']}")
+            print(f"Major:\n{issue[1]['major']}")
+            print(f"Extreme:\n{issue[1]['extreme']}")
