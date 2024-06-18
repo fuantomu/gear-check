@@ -101,6 +101,10 @@ def check_gear(gear, zone, spec):
         if item["itemLevel"] < zone_min_itemlevel[zone]:
             output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is <346\n"
         
+        # Check if resilience rating on gem
+        if "resirtng" in item_stats.keys():
+            output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) is a PvP item\n"
+        
         if item["slot"] not in ignore_enchant:
             if item.get("permanentEnchant") is None: 
                 if not item["slot"] in [10,11]: # if ring, ignore the no enchant rule
@@ -207,6 +211,9 @@ def check_gear(gear, zone, spec):
                 if gem_stats["color"] != 10 :
                     for color in gem_class[gem_stats["color"]]:
                         sockets[color] += 1
+                # Check if resilience rating on gem
+                if "resirtng" in gem_stats.keys():
+                    output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a PvP gem\n"
 
         # Check if socketed gem amount is equal to socket amount in item
         if len(item.get("gems", [])) < item_stats.get("nsockets", 0):
