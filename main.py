@@ -201,7 +201,7 @@ def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"
     players.extend([character for character in gear["healers"] if character.get("combatantInfo") != {}])
     players.extend([character for character in gear["dps"] if character.get("combatantInfo") != {}])
 
-    gear_issues = [check_gear(character["combatantInfo"]["gear"], zone, character["specs"][0]) for character in players]
+    gear_issues = [check_gear(character, zone) for character in players]
 
     batch_update_values_request_body = {
         "valueInputOption": "RAW",
@@ -509,7 +509,9 @@ if __name__ == "__main__":
         print("Running discord bot")
         bot.run(os.getenv('BOT_TOKEN'))
     else:
-        issues = update_gear_sheet(None,None, get_log_summary(sys.argv[1]), get_log(sys.argv[1]).get("zone"))
+        log = get_log(sys.argv[1])
+        gear_log = get_log_summary(sys.argv[1])
+        issues = update_gear_sheet(None,None, gear_log, log.get("zone"))
         for issue in issues:
             print("###################################################")
             print(f"{issue[0]}\n")

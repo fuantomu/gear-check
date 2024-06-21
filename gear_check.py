@@ -8,6 +8,7 @@ slots = {
     0 : "Helmet",
     1 : "Neck",
     2 : "Shoulder",
+    3 : "Shirt",
     4 : "Chest",
     5 : "Belt",
     6 : "Pants",
@@ -22,6 +23,7 @@ slots = {
     15 : "Mainhand",
     16 : "Offhand",
     17 : "Ranged/Relic",
+    18 : "Tabard"
 }
 
 ignore_slots = [3,18]
@@ -31,7 +33,8 @@ ignore_enchant = [1,5,12,13,17]
 wowhead_link = 'https://www.wowhead.com/cata/item=ITEMID?xml'
 
 zone_min_itemlevel = {
-    1023: 346
+    1023: 346,  # 25-player BWD/TOFW/BOT
+    1024: 346   # 10-player BWD/TOFW/BOT
 }
 
 gem_class = {
@@ -74,7 +77,8 @@ def load_enchants():
         print("ERROR: Could not load enchants")
 load_enchants()
 
-def check_gear(gear, zone, spec):
+def check_gear(character, zone):
+    print(f"Checking gear of player {character['name']}")
     output = {
         "minor": "",
         "major": "",
@@ -91,8 +95,12 @@ def check_gear(gear, zone, spec):
         "leatherworking": {"found": 0, "items": []}, 
         "alchemy": {"found": 0, "items": []}
     }
+    found_items = {}
+    spec = character["specs"][0]
+    gear = character["combatantInfo"]["gear"]
     meta = None
     for item in gear:
+        found_items[item["slot"]] = item["id"]
         if item["slot"] in ignore_slots or item["id"] == 0:
             continue
 
@@ -184,7 +192,7 @@ def check_gear(gear, zone, spec):
             item["missing"] = "Synapse Springs"
             professions["engineering"]["found"] -= 1
             professions["engineering"]["items"].append(item)
-        elif item["slot"] == 9 and item.get("onUseEnchant") != 4180 and spec in ["Guardian","Blood","Protection"] : # Quickflip Deflection Plates
+        elif item["slot"] == 9 and item.get("onUseEnchant") not in [4179,4180] and spec in ["Guardian","Blood","Protection"] : # Quickflip Deflection Plates
             item["missing"] = "Quickflip Deflection Plates"
             professions["engineering"]["found"] -= 1
             professions["engineering"]["items"].append(item)
@@ -197,8 +205,9 @@ def check_gear(gear, zone, spec):
             if any([gem["itemLevel"] < 85 for gem in item["gems"]]):
                 output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level gem\n"
             for gem in item["gems"]:
-                if "meta" in gem["icon"]:
-                    meta = get_wowhead_item(gem["id"])
+                gem_stats = get_wowhead_item(gem["id"])
+                if "meta" in gem_stats.keys():
+                    meta = gem_stats
                     continue
                 
                 if "dragonseye" in gem["icon"]:
@@ -206,7 +215,7 @@ def check_gear(gear, zone, spec):
                     existing_item = [found_item for found_item in professions["jewelcrafting"]["items"] if found_item["id"] == item["id"]]
                     if len(existing_item) == 0:
                         professions["jewelcrafting"]["items"].append(item)
-                gem_stats = get_wowhead_item(gem["id"])
+                
                 # Only add actual colored gems
                 if gem_stats["color"] != 10 :
                     for color in gem_class[gem_stats["color"]]:
@@ -264,6 +273,14 @@ def check_gear(gear, zone, spec):
     else:
         if any([sockets[int(k)] < v for k,v in meta["meta"].items()]):
             output["extreme"] += f"Meta gem is not active!\n"
+    
+    for item,id in found_items.items():
+        if item in ignore_slots:
+            continue
+        if id == 0:
+            if item == 16 and found_items[15] != 0:
+                continue
+            output["extreme"] += f"Missing item item in {slots[item]}"
             
     with open("cataclysm/items.json", "w") as f:
         json.dump(item_cache, f)
