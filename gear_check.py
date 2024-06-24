@@ -32,9 +32,15 @@ ignore_enchant = [1,5,12,13,17]
 
 wowhead_link = 'https://www.wowhead.com/cata/item=ITEMID?xml'
 
-zone_min_itemlevel = {
-    1023: 346,  # 25-player BWD/TOFW/BOT
-    1024: 346   # 10-player BWD/TOFW/BOT
+zone_itemlevel = {
+    1023: { # 25-player BWD/TOFW/BOT
+        "min": 346,  
+        "max": 372
+    },
+    1024: { # 10-player BWD/TOFW/BOT
+        "min": 346,  
+        "max": 372
+    }
 }
 
 gem_class = {
@@ -106,8 +112,8 @@ def check_gear(character, zone):
 
         item_stats = get_wowhead_item(item["id"])
         
-        if item["itemLevel"] < zone_min_itemlevel[zone]:
-            output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is < {zone_min_itemlevel[zone]}\n"
+        if item["itemLevel"] < zone_itemlevel[zone]["min"]:
+            output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is < {zone_itemlevel[zone]["min"]}\n"
         
         # Check if resilience rating on gem
         if "resirtng" in item_stats.keys():
@@ -126,9 +132,15 @@ def check_gear(character, zone):
                         
                         found_enchant = True
                         if enchant["tier"] >= 2:
-                            output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a very low level enchant: {enchant['name']}\n"
+                            if item["itemLevel"] == zone_itemlevel[zone]["max"]:
+                                output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is {zone_itemlevel[zone]['max']} and has a very low level enchant: {enchant['name']}\n"
+                            else:
+                                output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a very low level enchant: {enchant['name']}\n"
                         if enchant["tier"] == 1:
-                            output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level enchant: {enchant['name']}\n"
+                            if item["itemLevel"] == zone_itemlevel[zone]["max"]:
+                                output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is {zone_itemlevel[zone]['max']} and has a low level enchant: {enchant['name']}\n"
+                            else:
+                                output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level enchant: {enchant['name']}\n"
                         
                         unsuited_enchant_found = False
                         if enchant.get("role") is not None:
