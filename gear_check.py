@@ -55,6 +55,7 @@ gem_class = {
 roles = {
     "tank": ["Blood","Guardian","Protection"],
     "caster": ["Fire","Arcane","Frost","Affliction","Demonology","Destruction","Elemental","Shadow","Balance","Restoration","Holy","Discipline"],
+    "physical": ["Enhancement","Feral","Fury","Arms","Assassination","Combat","Subtlety","Unholy","Frost","Retribution","Beastmastery","Survival","Marksmanship"],
     "dps": ["Enhancement","Feral","Fury","Arms","Assassination","Combat","Subtlety","Unholy","Frost","Retribution","Fire","Arcane","Frost","Affliction","Demonology","Destruction","Elemental","Shadow","Balance","Beastmastery","Survival","Marksmanship"],
     "melee": ["Enhancement","Feral","Fury","Arms","Assassination","Combat","Subtlety","Unholy","Frost","Retribution"],
     "ranged": ["Beastmastery","Survival","Marksmanship"],
@@ -66,6 +67,9 @@ class_types = {
     "agility": ["Enhancement","Feral","Beastmastery","Survival","Marksmanship","Assassination","Combat","Subtlety"]
 }
 
+spec_stats = {
+    "Guardian": "agility"
+}
 
 
 item_cache = {}
@@ -154,7 +158,7 @@ def check_gear(character, zone):
                                 unsuited_enchant_found = True
                                 output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has an enchant that is not suited for their role ({spec}): {enchant['name']} ({enchant['role']})\n"
                         if enchant.get("type") is not None and not unsuited_enchant_found:
-                            if spec not in class_types[enchant["type"]] and spec != enchant.get("spec"):
+                            if spec not in class_types[enchant["type"]] and spec != enchant.get("spec") and spec_stats.get(spec) != enchant.get("type"):
                                 output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has an enchant that is not suited for their type ({spec}): {enchant['name']} ({enchant['type']})\n"
                         
                         # Check if ring has enchant
