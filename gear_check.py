@@ -132,8 +132,8 @@ def check_gear(character, zone):
                         
                         found_enchant = True
                         if enchant["tier"] >= 2:
-                            if item["itemLevel"] == zone_itemlevel[zone]["max"]:
-                                output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is {zone_itemlevel[zone]['max']} and has a very low level enchant: {enchant['name']}\n"
+                            if item["itemLevel"] >= zone_itemlevel[zone]["max"]:
+                                output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is {zone_itemlevel[zone]['max']} or higher and has a very low level enchant: {enchant['name']}\n"
                             else:
                                 output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a very low level enchant: {enchant['name']}\n"
                         if enchant["tier"] == 1:
