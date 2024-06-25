@@ -125,6 +125,12 @@ def check_gear(character, zone):
                     output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing enchant\n"
                 else:
                     professions["enchanting"]["items"].append(item)
+                    
+                if item["slot"] == 14:
+                    professions["tailoring"]["items"].append(item)
+                elif item["slot"] == 6:
+                    professions["leatherworking"]["items"].append(item)
+                    professions["tailoring"]["items"].append(item)
             else:
                 found_enchant = False
                 for enchant in enchants[str(item["slot"])]:
@@ -269,11 +275,19 @@ def check_gear(character, zone):
             if profession[0] == "leatherworking" and profession[1]['found'] < 2:
                 other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4127,4126,4270]]
                 if len(other_leg_enchant) == 0:
-                    output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing leatherworking enchant\n"
+                    try:
+                        output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing leatherworking enchant\n"
+                    except:
+                        output["major"] += f"Missing Cloak/Leg enchant\n"
+                    
             if profession[0] == "tailoring" and profession[1]['found'] < 2:
                 other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4110,4112]]
                 if len(other_leg_enchant) == 0:
-                    output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
+                    try:
+                        output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
+                    except:
+                        output["major"] += f"Missing Cloak/Leg tailoring enchant\n"
+                    
     
     if len(total_professions) == 1:
         output["extreme"] += f"Only one primary profession bonus found: {','.join(total_professions)}\n"
