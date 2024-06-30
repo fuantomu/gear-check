@@ -277,15 +277,15 @@ def check_gear(character, zone):
             if profession[0] == "engineering" and profession[1]['found'] < 2:
                 output["major"] += ','.join([f"{found_item.get('name', '')} ({slots[found_item['slot']]}) missing engineering enchant: {found_item['missing']}\n" for found_item in profession[1]['items']])
             if profession[0] == "leatherworking" and profession[1]['found'] < 2:
-                other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4127,4126,4270]]
+                other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4127,4126,4270] or (other_enchant.get("permanentEnchant") in [4109,4110,4111,4112,4113,4114] and spec in roles["caster"])]
                 if len(other_leg_enchant) == 0:
                     try:
                         output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing leatherworking enchant\n"
                     except:
-                        output["major"] += f"Missing Cloak/Leg enchant\n"
+                        output["major"] += f"Missing Cloak/Leg leatherworking enchant\n"
                     
             if profession[0] == "tailoring" and profession[1]['found'] < 2:
-                other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4110,4112]]
+                other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4110,4112] or (other_enchant.get("permanentEnchant") in [4122,4124,4126,4127,4126,4270,4439,4440] and spec in roles["physical"])]
                 if len(other_leg_enchant) == 0:
                     try:
                         output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
