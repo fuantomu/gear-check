@@ -115,6 +115,8 @@ def check_gear(character, zone):
             continue
 
         item_stats = get_wowhead_item(item["id"])
+        if item_stats is None:
+            continue
         
         if item["itemLevel"] < zone_itemlevel[zone]["min"]:
             output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is < {zone_itemlevel[zone]['min']}\n"
@@ -321,7 +323,12 @@ def get_wowhead_item(id):
     if item_cache.get(str(id)) is None:
         print(f"Requesting item {id} from wowhead")
         wowhead_response = requests.get(wowhead_link.replace("ITEMID", str(id)))
-        parsed_xml = xmltodict.parse(wowhead_response.content)
+        
+        try:
+            parsed_xml = xmltodict.parse(wowhead_response.content)
+        except:
+            print(f"Error parsing item {id}")
+            return None
         
         parsed_item = ast.literal_eval("{ " + parsed_xml["wowhead"]["item"]["jsonEquip"] + " }")
         if parsed_xml["wowhead"]["item"]["class"]['#text'] == "Gems":
