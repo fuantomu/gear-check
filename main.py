@@ -36,7 +36,7 @@ async def cutsheet(ctx, arg):
   description="Process warcraftlogs report to check player gear",
   guild_ids=os.getenv('GUILD_IDS').split(",")
 )
-async def gearcheck(ctx, arg):
+async def gearcheck(ctx, arg, role=None):
     await ctx.defer()
     log = get_log(arg)
 
@@ -47,6 +47,8 @@ async def gearcheck(ctx, arg):
         spreadsheet_id = create_gear_sheet(log, gear_log)
         
         await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
+        if role is not None:
+            await ctx.send(f"<@&{role}>")
 
 @gearcheck.error
 @cutsheet.error
