@@ -8,7 +8,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from gear_check import check_gear
+from gear_check import check_gear, load_enchants
 import sys
 load_dotenv(override=True)
 
@@ -202,6 +202,8 @@ def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"
     players.extend([character for character in gear["tanks"] if character.get("combatantInfo") != {}])
     players.extend([character for character in gear["healers"] if character.get("combatantInfo") != {}])
     players.extend([character for character in gear["dps"] if character.get("combatantInfo") != {}])
+    
+    load_enchants()
 
     gear_issues = [check_gear(character, zone) for character in players]
 
