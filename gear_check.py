@@ -318,7 +318,7 @@ def check_gear(character, zone):
         if id == 0:
             if item == 16 and found_items[15] != 0:
                 continue
-            output["extreme"] += f"Missing item item in {slots[item]}"
+            output["extreme"] += f"Missing item item in {slots[item]}\n"
             
     with open("cataclysm/items.json", "w") as f:
         json.dump(item_cache, f)
