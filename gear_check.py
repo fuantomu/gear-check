@@ -90,6 +90,11 @@ load_enchants()
 
 def check_gear(character, zone):
     print(f"Checking gear of player {character['name']}")
+
+    if zone not in zone_itemlevel.keys():
+        print(f"Zone {zone} is not valid. Defaulting to 25 player BOT/TOFW/BWD")
+        zone = 1023
+
     output = {
         "minor": "",
         "major": "",
@@ -110,7 +115,7 @@ def check_gear(character, zone):
     spec = character["specs"][0]
     gear = character["combatantInfo"]["gear"]
     meta = None
-    for item in gear:
+    for item in gear:        
         found_items[item["slot"]] = item["id"]
         if item["slot"] in ignore_slots or item["id"] == 0:
             continue
