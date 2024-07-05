@@ -199,9 +199,9 @@ def update_sheet(service, spreadsheetId, sheet_title, log):
 #       factionID
 def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"):
     players = []
-    players.extend([character for character in gear["tanks"] if character.get("combatantInfo") != {}])
-    players.extend([character for character in gear["healers"] if character.get("combatantInfo") != {}])
-    players.extend([character for character in gear["dps"] if character.get("combatantInfo") != {}])
+    players.extend([character for character in gear.get("tanks", {}) if character.get("combatantInfo") != {}])
+    players.extend([character for character in gear.get("healers",{}) if character.get("combatantInfo") != {}])
+    players.extend([character for character in gear.get("dps", {}) if character.get("combatantInfo") != {}])
     
     load_enchants()
 
