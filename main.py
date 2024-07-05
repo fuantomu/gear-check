@@ -10,26 +10,35 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from gear_check import check_gear, load_enchants
 import sys
+import asyncio
 load_dotenv(override=True)
 
 scopes = ["https://www.googleapis.com/auth/spreadsheets",'https://www.googleapis.com/auth/drive','https://www.googleapis.com/auth/drive.metadata','https://www.googleapis.com/auth/drive.file',]
 bot = commands.Bot()
+current_message = None
 
 @bot.slash_command(
   name="cutsheet",
   description="Process warcraftlogs report to a new cut sheet",
   guild_ids=os.getenv('GUILD_IDS').split(",")
 )
-async def cutsheet(ctx, arg):
+async def cutsheet(ctx, arg, role=None):
+    global current_message
     await ctx.defer()
+    current_message = await ctx.followup.send("Working...")
     log = get_log(arg)
     if log.get("error") is not None:
         await ctx.followup.send(log["error"])
     else:
         gear_log = get_log_summary(arg)
-        spreadsheet_id, sheet_id = create_sheet(log, gear_log, "Cuts")
+        spreadsheet_id, sheet_id = await create_sheet(log, gear_log, "Cuts")
         
-        await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}')
+        await update_discord_post(f"Done")
+        if role is not None:
+            await ctx.followup.send(f"<@&{role}>\nhttps://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}")
+        else:
+            await ctx.followup.send(f'<@{ctx.user.id}>\nhttps://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}')
+    current_message = None
     
 @bot.slash_command(
   name="gearcheck",
@@ -37,18 +46,23 @@ async def cutsheet(ctx, arg):
   guild_ids=os.getenv('GUILD_IDS').split(",")
 )
 async def gearcheck(ctx, arg, role=None):
+    global current_message
     await ctx.defer()
+    current_message = await ctx.followup.send("Working...")
     log = get_log(arg)
 
     if log.get("error") is not None:
         await ctx.followup.send(log["error"])
     else:
         gear_log = get_log_summary(arg)
-        spreadsheet_id = create_gear_sheet(log, gear_log)
+        spreadsheet_id = await create_gear_sheet(log, gear_log)
         
-        await ctx.followup.send(f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
+        await update_discord_post(f"Done")
         if role is not None:
-            await ctx.send(f"<@&{role}>")
+            await ctx.followup.send(f"<@&{role}>\nhttps://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0")
+        else:
+            await ctx.followup.send(f'<@{ctx.user.id}>\nhttps://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
+    current_message = None
 
 @gearcheck.error
 @cutsheet.error
@@ -85,10 +99,11 @@ def get_creds():
             token.write(creds.to_json())
     return creds
     
-def create_sheet(log, gear_log, sheet_title):
+async def create_sheet(log, gear_log, sheet_title):
     creds = get_creds()
 
     try:
+        await update_discord_post(f"Creating Google Sheet")
         service = build('sheets', 'v4', credentials=creds)
         title = f"{log.get('title')} Gold Cut Sheet"
         spreadsheet = {
@@ -99,10 +114,11 @@ def create_sheet(log, gear_log, sheet_title):
         spreadsheet = service.spreadsheets().create(body=spreadsheet,fields='spreadsheetId').execute()
         copy_sheet = service.spreadsheets().sheets().copyTo(spreadsheetId = os.getenv("SOURCE_SPREADSHEET"), sheetId=os.getenv("SOURCE_SHEET"),body={"destinationSpreadsheetId": spreadsheet.get('spreadsheetId')}).execute()
         service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet.get('spreadsheetId'), body={"requests": [{"updateSheetProperties":{ "properties": {"sheetId": copy_sheet.get('sheetId'), "title": sheet_title}, "fields": "title"}}]}).execute()
-        update_sheet(service, spreadsheet.get('spreadsheetId'), sheet_title, log)
-        update_gear_sheet(service, spreadsheet.get('spreadsheetId'), gear_log, log.get("zone"), sheet_title="Sheet1")
+        await update_sheet(service, spreadsheet.get('spreadsheetId'), sheet_title, log)
+        await update_gear_sheet(service, spreadsheet.get('spreadsheetId'), gear_log, log.get("zone"), sheet_title="Sheet1")
         
         # Connect to Google Drive and make spreadsheet public
+        await update_discord_post(f"Making Google Sheet public")
         drive_client = build('drive', 'v3', credentials=creds)
         
         files = drive_client.files().list(q=f"name contains '{title}'",spaces="drive",fields="nextPageToken, files(id, name)").execute().get('files')
@@ -121,21 +137,23 @@ def create_sheet(log, gear_log, sheet_title):
     except HttpError as error:
         print(f"An error occurred: {error}")
     
-def create_gear_sheet(log, gear_log):
+async def create_gear_sheet(log, gear_log):
     creds = get_creds()
 
     try:
+        await update_discord_post(f"Creating Google Sheet")
         service = build('sheets', 'v4', credentials=creds)
         title = f"{log.get('title')} Gear Sheet"
         spreadsheet = {
             'properties': {
                 'title': title
             }
-        }        
+        }
         spreadsheet = service.spreadsheets().create(body=spreadsheet,fields='spreadsheetId').execute()
-        update_gear_sheet(service, spreadsheet.get('spreadsheetId'), gear_log, log.get("zone"))
+        await update_gear_sheet(service, spreadsheet.get('spreadsheetId'), gear_log, log.get("zone"))
         
         # Connect to Google Drive and make spreadsheet public
+        await update_discord_post(f"Making Google Sheet public")
         drive_client = build('drive', 'v3', credentials=creds)
         
         files = drive_client.files().list(q=f"name contains '{title}'",spaces="drive",fields="nextPageToken, files(id, name)").execute().get('files')
@@ -154,7 +172,8 @@ def create_gear_sheet(log, gear_log):
     except HttpError as error:
         print(f"An error occurred: {error}")
     
-def update_sheet(service, spreadsheetId, sheet_title, log):
+async def update_sheet(service, spreadsheetId, sheet_title, log):
+    await update_discord_post(f"Updating Cut sheet")
     batch_update_values_request_body = {
         "valueInputOption": "RAW",
         "data": [
@@ -197,15 +216,18 @@ def update_sheet(service, spreadsheetId, sheet_title, log):
 #               icon
 #       specIDs
 #       factionID
-def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"):
+async def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"):
     players = []
     players.extend([character for character in gear.get("tanks", {}) if character.get("combatantInfo") != {}])
     players.extend([character for character in gear.get("healers",{}) if character.get("combatantInfo") != {}])
     players.extend([character for character in gear.get("dps", {}) if character.get("combatantInfo") != {}])
     
     load_enchants()
-
-    gear_issues = [check_gear(character, zone) for character in players]
+    
+    gear_issues = []
+    for character in players:
+        await update_discord_post(f"Checking gear of player {character.get('name')}")
+        gear_issues.append(check_gear(character, zone))
 
     batch_update_values_request_body = {
         "valueInputOption": "RAW",
@@ -273,6 +295,8 @@ def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "Sheet1"
         ]
     }
     
+    await update_discord_post(f"Updating Gear Sheet")
+        
     try:
         service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body=batch_update_values_request_body).execute()
     except:
@@ -507,6 +531,11 @@ def update_alignment(service, spreadsheetId, range):
         "requests": request_body
     }
     service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
+    
+async def update_discord_post(msg):
+    global current_message
+    if current_message is not None:
+        await current_message.edit(content=msg)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -515,7 +544,8 @@ if __name__ == "__main__":
     else:
         log = get_log(sys.argv[1])
         gear_log = get_log_summary(sys.argv[1])
-        issues = update_gear_sheet(None,None, gear_log, log.get("zone"))
+        loop = asyncio.get_event_loop()
+        issues = loop.run_until_complete(update_gear_sheet(None,None, gear_log, log.get("zone")))
         for issue in issues:
             print("###################################################")
             print(f"{issue[0]}\n")
