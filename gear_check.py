@@ -49,7 +49,8 @@ gem_class = {
     2: [2], # Yellow
     3: [0,1], # Purple
     4: [1,2], # Green
-    5: [0,2] # Orange
+    5: [0,2], # Orange
+    8: [0,1,2] # Prismatic
 }
 
 roles = {
