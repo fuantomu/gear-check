@@ -33,11 +33,11 @@ async def cutsheet(ctx, arg, role=None):
         gear_log = get_log_summary(arg)
         spreadsheet_id, sheet_id = await create_sheet(log, gear_log, "Cuts")
         
-        await update_discord_post(f"Done")
+        await update_discord_post(f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}")
         if role is not None:
-            await ctx.followup.send(f"<@&{role}>\nhttps://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}")
+            await ctx.send(f"<@&{role}>")
         else:
-            await ctx.followup.send(f'<@{ctx.user.id}>\nhttps://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}')
+            await ctx.send(f'<@{ctx.user.id}>')
     current_message = None
     
 @bot.slash_command(
@@ -57,11 +57,11 @@ async def gearcheck(ctx, arg, role=None):
         gear_log = get_log_summary(arg)
         spreadsheet_id = await create_gear_sheet(log, gear_log)
         
-        await update_discord_post(f"Done")
+        await update_discord_post(f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0")
         if role is not None:
-            await ctx.followup.send(f"<@&{role}>\nhttps://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0")
+            await ctx.send(f"<@&{role}>")
         else:
-            await ctx.followup.send(f'<@{ctx.user.id}>\nhttps://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid=0')
+            await ctx.send(f'<@{ctx.user.id}>')
     current_message = None
 
 @gearcheck.error
