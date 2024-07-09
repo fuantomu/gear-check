@@ -276,79 +276,84 @@ def check_gear(character, zone):
         if item_stats is None:
             continue
         
-        if item["itemLevel"] < zone_itemlevel[zone]["min"]:
-            output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is < {zone_itemlevel[zone]['min']}\n"
+        item_stats["slot"] = item["slot"]
+        item_stats["permanentEnchant"] = item.get("permanentEnchant")
+        item_stats["permanentEnchantName"] = item.get("permanentEnchantName", "Unknown name")
+        item_stats["onUseEnchant"] = item.get("onUseEnchant")
+        
+        if item_stats["itemlevel"] < zone_itemlevel[zone]["min"]:
+            output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is < {zone_itemlevel[zone]['min']}\n"
         
         # Check if resilience rating on gem
         if "resirtng" in item_stats.keys():
-            output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) is a PvP item\n"
+            output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is a PvP item\n"
         
-        if item["slot"] not in ignore_enchant:
-            if item.get("permanentEnchant") is None: 
-                if not item["slot"] in [10,11]: # if ring, ignore the no enchant rule
-                    output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing enchant\n"
+        if item_stats['slot'] not in ignore_enchant:
+            if item_stats["permanentEnchant"] is None: 
+                if not item_stats['slot'] in [10,11]: # if ring, ignore the no enchant rule
+                    output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) missing enchant\n"
                 else:
-                    professions["enchanting"]["items"].append(item)
+                    professions["enchanting"]["items"].append(item_stats)
                     
-                if item["slot"] == 14:
-                    professions["tailoring"]["items"].append(item)
-                elif item["slot"] == 6:
-                    professions["leatherworking"]["items"].append(item)
-                    professions["tailoring"]["items"].append(item)
+                if item_stats['slot'] == 14:
+                    professions["tailoring"]["items"].append(item_stats)
+                elif item_stats['slot'] == 6:
+                    professions["leatherworking"]["items"].append(item_stats)
+                    professions["tailoring"]["items"].append(item_stats)
             else:
                 found_enchant = False
-                for enchant in enchants[str(item["slot"])]:
-                    if enchant["id"] == item["permanentEnchant"]:
+                for enchant in enchants[str(item_stats['slot'])]:
+                    if enchant["id"] == item_stats["permanentEnchant"]:
                         
                         found_enchant = True
                         if enchant["tier"] >= 2:
-                            if item["itemLevel"] >= zone_itemlevel[zone]["max"]:
-                                output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is {zone_itemlevel[zone]['max']} or higher and has a very low level enchant: {enchant['name']}\n"
+                            if item_stats["itemlevel"] >= zone_itemlevel[zone]["max"]:
+                                output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is {zone_itemlevel[zone]['max']} or higher and has a very low level enchant: {enchant['name']}\n"
                             else:
-                                output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a very low level enchant: {enchant['name']}\n"
+                                output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a very low level enchant: {enchant['name']}\n"
                         if enchant["tier"] == 1:
-                            if item["itemLevel"] == zone_itemlevel[zone]["max"]:
-                                output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) itemlevel is {zone_itemlevel[zone]['max']} and has a low level enchant: {enchant['name']}\n"
+                            if item_stats["itemlevel"] == zone_itemlevel[zone]["max"]:
+                                output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is {zone_itemlevel[zone]['max']} and has a low level enchant: {enchant['name']}\n"
                             else:
-                                output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level enchant: {enchant['name']}\n"
+                                output["minor"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a low level enchant: {enchant['name']}\n"
                         
                         unsuited_enchant_found = False
                         if enchant.get("role") is not None:
                             if spec not in roles[enchant["role"]] and spec != enchant.get("spec"):
                                 unsuited_enchant_found = True
-                                output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has an enchant that is not suited for their role ({spec}): {enchant['name']} ({enchant['role']})\n"
+                                output["minor"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an enchant that is not suited for their role ({spec}): {enchant['name']} ({enchant['role']})\n"
                         if enchant.get("type") is not None and not unsuited_enchant_found:
                             if spec not in class_types[enchant["type"]] and spec != enchant.get("spec") and spec_stats.get(spec) != enchant.get("type"):
-                                output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has an enchant that is not suited for their type ({spec}): {enchant['name']} ({enchant['type']})\n"
+                                output["minor"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an enchant that is not suited for their type ({spec}): {enchant['name']} ({enchant['type']})\n"
                         
                         # Check if ring has enchant
-                        if item["slot"] in [10,11]:
+                        if item_stats['slot'] in [10,11]:
                             professions["enchanting"]["found"] += 1
                         
                         # Check if tailoring/leatherworking leg enchant exists
-                        if item["slot"] == 6:
+                        if item_stats['slot'] == 6:
                             if enchant["id"] in [4439,4440]:
                                 professions["leatherworking"]["found"] += 1
                             else:
-                                professions["leatherworking"]["items"].append(item)
+                                professions["leatherworking"]["items"].append(item_stats)
                             if enchant["id"] in [4113,4114]:
                                 professions["tailoring"]["found"] += 1
                             else:
-                                professions["tailoring"]["items"].append(item)
+                                professions["tailoring"]["items"].append(item_stats)
                         # Check if leatherworking bracer enchant exists
-                        if item["slot"] == 8:
+                        if item_stats['slot'] == 8:
                             if enchant["id"] in [4189,4190,4191,4192]:
                                 professions["leatherworking"]["found"] += 1
                             else:
-                                professions["leatherworking"]["items"].append(item)
+                                professions["leatherworking"]["items"].append(item_stats)
                         # Check if inscription shoulder enchant exists
-                        if item["slot"] == 2:
+                        if item_stats['slot'] == 2:
                             if enchant["id"] in [4193,4194,4195,4196]:
                                 professions["inscription"]["found"] += 1
                             else:
-                                professions["inscription"]["items"].append(item)
+                                professions["inscription"]["items"].append(item_stats)
                         # Check if tailoring cloak enchant exist
-                        if item["slot"] == 14:
+                        if item_stats['slot'] == 14:
                             if enchant["id"] in [4115,4116,4118]:
                                 # If class main stat is agility/strength, ignore tailoring leg enchant
                                 if spec in class_types["agility"] or spec in class_types["strength"]:
@@ -356,50 +361,51 @@ def check_gear(character, zone):
                                 else:
                                     professions["tailoring"]["found"] += 1
                             else:
-                                professions["tailoring"]["items"].append(item)
+                                professions["tailoring"]["items"].append(item_stats)
                 
                 # If enchants are used that are not registered in the cache, extract the id and name
                 if not found_enchant:
-                    output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) has an incorrect enchant (Unknown enchant or low level)\n"
+                    output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an incorrect enchant (Unknown enchant or low level)\n"
                     with open(f"unknown_enchants","a") as f:
-                        f.write(f"\n{character.get('name')} - {slots[item['slot']]}\n")
-                        f.write(f'{str(item["permanentEnchant"])} - {str(item.get("permanentEnchantName", "Unknown name"))}')
+                        f.write(f"\n{character.get('name')} - {slots[item_stats['slot']]}\n")
+                        f.write(f'{str(item_stats["permanentEnchant"])} - {str(item_stats["permanentEnchantName"])}')
                 
             
-        if item["slot"] == 5 and item.get("onUseEnchant") != 4223: # Nitro Boosts
-            item["missing"] = "Nitro Boosts"
+        if item_stats['slot'] == 5 and item.get("onUseEnchant") != 4223: # Nitro Boosts
+            item_stats["missing"] = "Nitro Boosts"
             professions["engineering"]["found"] -= 1
-            professions["engineering"]["items"].append(item)
-        if item["slot"] == 9 and item.get("onUseEnchant") != 4179 and spec not in ["Guardian","Blood","Protection"] : # Synapse Springs
-            item["missing"] = "Synapse Springs"
+            professions["engineering"]["items"].append(item_stats)
+        if item_stats['slot'] == 9 and item.get("onUseEnchant") != 4179 and spec not in ["Guardian","Blood","Protection"] : # Synapse Springs
+            item_stats["missing"] = "Synapse Springs"
             professions["engineering"]["found"] -= 1
-            professions["engineering"]["items"].append(item)
-        elif item["slot"] == 9 and item.get("onUseEnchant") not in [4179,4180] and spec in ["Guardian","Blood","Protection"] : # Quickflip Deflection Plates
-            item["missing"] = "Quickflip Deflection Plates"
+            professions["engineering"]["items"].append(item_stats)
+        elif item_stats['slot'] == 9 and item.get("onUseEnchant") not in [4179,4180] and spec in ["Guardian","Blood","Protection"] : # Quickflip Deflection Plates
+            item_stats["missing"] = "Quickflip Deflection Plates"
             professions["engineering"]["found"] -= 1
-            professions["engineering"]["items"].append(item)
+            professions["engineering"]["items"].append(item_stats)
 
         # Check if socket amount in belt is higher than base socket amount in item
-        if item["slot"] == 5 and len(item.get("gems", [])) < item_stats.get("nsockets", 0)+1:
-            output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) missing a belt buckle\n"
+        if item_stats['slot'] == 5 and len(item.get("gems", [])) < item_stats.get("nsockets", 0)+1:
+            output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) missing a belt buckle\n"
         
         if item.get("gems") is not None:
             if any([gem["itemLevel"] < 85 for gem in item["gems"]]):
-                output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a low level gem\n"
+                output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a low level gem\n"
             for gem in item["gems"]:
                 gem_stats = get_wowhead_item(gem["id"])
                 if "meta" in gem_stats.keys():
                     meta = gem_stats
                     continue
                 
-                if "dragonseye" in gem["icon"]:
+                # if gem requires jewelcrafting
+                if gem.get("reqskill") == 755:
                     professions["jewelcrafting"]["found"] += 1
-                    existing_item = [found_item for found_item in professions["jewelcrafting"]["items"] if found_item["id"] == item["id"]]
+                    existing_item = [found_item for found_item in professions["jewelcrafting"]["items"] if found_item["id"] == item_stats["id"]]
                     if len(existing_item) == 0:
-                        professions["jewelcrafting"]["items"].append(item)
+                        professions["jewelcrafting"]["items"].append(item_stats)
                 
-                # Ignore cogwheel gems
-                if gem_stats["color"] != 10 :
+                # Ignore cogwheel and meta gems
+                if gem_stats["subclass"] not in [6,10] :
                     total_attributes = []
                     # Get all gem attributes
                     for attr in gem_attributes:
@@ -408,31 +414,31 @@ def check_gear(character, zone):
                     # Check if gem is a useful stat
                     if not any([all([attr in spec_atr for attr in total_attributes]) for spec_atr in gem_specs[f"{character['type']}-{spec}"]["gems"]]):
                         if not any([attr in gem_specs[f"{character['type']}-{spec}"]["mainstat"] for attr in total_attributes]):
-                            output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a gem that is not mainstat\n"
+                            output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not mainstat\n"
                         else:
                             attribute_string = " & ".join(set([attribute_locale.get(attr) for attr in total_attributes]))
-                            output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a non-optimal gem ({attribute_string})\n"
+                            output["minor"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a non-optimal gem ({attribute_string})\n"
                     # Add color of gem to total sockets
-                    for color in gem_class[gem_stats["color"]]:
+                    for color in gem_class[gem_stats["subclass"]]:
                         sockets[color] += 1
                 # Check if resilience rating on gem
                 if "resirtng" in gem_stats.keys():
-                    output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a PvP gem\n"
+                    output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a PvP gem\n"
 
         # Check if socketed gem amount is equal to socket amount in item
         if len(item.get("gems", [])) < item_stats.get("nsockets", 0):
-            output["extreme"] += f"{item.get('name', '')} ({slots[item['slot']]}) has {item_stats['nsockets']-len(item.get('gems', []))} empty socket(s)\n"
+            output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has {item_stats['nsockets']-len(item.get('gems', []))} empty socket(s)\n"
         
         # Find blacksmithing sockets in bracers/gloves
-        if item["slot"] in [8,9]:
+        if item_stats['slot'] in [8,9]:
             if len(item.get("gems", [])) > item_stats.get("nsockets", 0):
                 professions["blacksmithing"]["found"] +=1
             else:
-                professions["blacksmithing"]["items"].append(item)
+                professions["blacksmithing"]["items"].append(item_stats)
         
         # Find alchemy trinket
-        if item["slot"] in [12,13]:
-            if item["id"] in [58483,68775,68776,68777]:
+        if item_stats['slot'] in [12,13]:
+            if item_stats["id"] in [58483,68775,68776,68777]:
                 professions["alchemy"]["found"] +=1
 
     total_professions = [profession[0].capitalize() for profession in professions.items() if profession[1]["found"] > 0]
@@ -441,19 +447,19 @@ def check_gear(character, zone):
             if profession[0] == "enchanting" and profession[1]['found'] < 2:
                 archaeology_ring = [other_finger for other_finger in gear if other_finger["id"] == 64904]
                 if len(archaeology_ring) == 0:
-                    output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing enchanting-specific enchant\n"
+                    output["major"] += f"{profession[1]['items'][0]['name']} ({slots[profession[1]['items'][0]['slot']]}) missing enchanting-specific enchant\n"
             if profession[0] == "blacksmithing" and profession[1]['found'] < 2:
-                output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing blacksmithing socket\n"
+                output["major"] += f"{profession[1]['items'][0]['name']} ({slots[profession[1]['items'][0]['slot']]}) missing blacksmithing socket\n"
             if profession[0] == "jewelcrafting" and profession[1]['found'] < 3:
-                item_text = ','.join([f"{found_item.get('name', '')} ({slots[found_item['slot']]})" for found_item in profession[1]['items']])
+                item_text = ','.join([f"{found_item['name']} ({slots[found_item['slot']]})" for found_item in profession[1]['items']])
                 output["major"] += f"Gear missing {3-profession[1]['found']} jewelcrafting gem(s) (only found gem(s) in {item_text})\n"
             if profession[0] == "engineering" and profession[1]['found'] < 2:
-                output["major"] += ','.join([f"{found_item.get('name', '')} ({slots[found_item['slot']]}) missing engineering enchant: {found_item['missing']}\n" for found_item in profession[1]['items']])
+                output["major"] += ','.join([f"{found_item['name']} ({slots[found_item['slot']]}) missing engineering enchant: {found_item['missing']}\n" for found_item in profession[1]['items']])
             if profession[0] == "leatherworking" and profession[1]['found'] < 2:
                 other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4127,4126,4270] or (other_enchant.get("permanentEnchant") in [4109,4110,4111,4112,4113,4114] and spec in roles["caster"])]
                 if len(other_leg_enchant) == 0:
                     try:
-                        output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing leatherworking enchant\n"
+                        output["major"] += f"{profession[1]['items'][0]['name']} ({slots[profession[1]['items'][0]['slot']]}) missing leatherworking enchant\n"
                     except:
                         output["major"] += f"Missing Cloak/Leg leatherworking enchant\n"
                     
@@ -461,7 +467,7 @@ def check_gear(character, zone):
                 other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4110,4112] or (other_enchant.get("permanentEnchant") in [4122,4124,4126,4127,4126,4270,4439,4440] and spec in roles["physical"])]
                 if len(other_leg_enchant) == 0:
                     try:
-                        output["major"] += f"{profession[1]['items'][0].get('name', '')} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
+                        output["major"] += f"{profession[1]['items'][0]['name']} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
                     except:
                         output["major"] += f"Missing Cloak/Leg tailoring enchant\n"
                     
@@ -502,20 +508,24 @@ def get_wowhead_item(id):
             return None
         
         parsed_item = ast.literal_eval("{ " + parsed_xml["wowhead"]["item"]["jsonEquip"] + " }")
-        if parsed_xml["wowhead"]["item"]["class"]['#text'] == "Gems":
-            # if item is gem, parse html data for meta requirements
-            if parsed_xml["wowhead"]["item"]["subclass"]['#text'] == "Meta Gems":
-                parsed_item["meta"] = {}
+        parsed_item["id"] = parsed_xml["wowhead"]["item"]['@id']
+        parsed_item["name"] = parsed_xml["wowhead"]["item"]["name"]
+        parsed_item["itemlevel"] = int(parsed_xml["wowhead"]["item"]["level"])
+        parsed_item["quality"] = int(parsed_xml["wowhead"]["item"]["quality"]['@id'])
+        parsed_item["class"] = int(parsed_xml["wowhead"]["item"]["class"]['@id'])
+        parsed_item["subclass"] = int(parsed_xml["wowhead"]["item"]["subclass"]['@id'])
+        
+        # if item is gem, parse html data for meta requirements
+        if parsed_item["class"] == 3 and parsed_item["subclass"] == 6:
+            parsed_item["meta"] = {}
 
-                requirements = re.findall(r'<div class="q0">(.*?)<\/div>', parsed_xml["wowhead"]["item"]["htmlTooltip"])[0].split("<br />")
-                for entry in requirements:
-                    if "Red" in entry:
-                        parsed_item["meta"][0] = int(re.findall(r'([0-9])', entry)[0])
-                    elif "Blue" in entry:
-                        parsed_item["meta"][1] = int(re.findall(r'([0-9])', entry)[0])
-                    elif "Yellow" in entry:
-                        parsed_item["meta"][2] = int(re.findall(r'([0-9])', entry)[0])
-            else:
-                parsed_item["color"] = int(parsed_xml["wowhead"]["item"]["subclass"]['@id'])
+            requirements = re.findall(r'<div class="q0">(.*?)<\/div>', parsed_xml["wowhead"]["item"]["htmlTooltip"])[0].split("<br />")
+            for entry in requirements:
+                if "Red" in entry:
+                    parsed_item["meta"][0] = int(re.findall(r'([0-9])', entry)[0])
+                elif "Blue" in entry:
+                    parsed_item["meta"][1] = int(re.findall(r'([0-9])', entry)[0])
+                elif "Yellow" in entry:
+                    parsed_item["meta"][2] = int(re.findall(r'([0-9])', entry)[0])
         item_cache[str(id)] = parsed_item
     return item_cache[str(id)]
