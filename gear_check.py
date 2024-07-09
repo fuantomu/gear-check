@@ -50,7 +50,160 @@ gem_class = {
     3: [0,1], # Purple
     4: [1,2], # Green
     5: [0,2], # Orange
-    8: [0,1,2] # Prismatic
+    8: [0,1,2], # Prismatic
+    10: [] # Cogwheel
+}
+
+gem_attributes = ["int","str","agi","spi","sta","splhastertng","mlehastertng","rgdhastertng","splhitrtng","mlehitrtng","rgdhitrtng","mastrtng","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng","exprtng","parryrtng","dodgertng","resirtng","splpen"]
+
+attribute_locale = {
+    "int": "Intellect",
+    "str": "Strength",
+    "agi": "Agility",
+    "spi": "Spirit",
+    "sta": "Stamina",
+    "splhastertng": "Haste rating",
+    "mlehastertng": "Haste rating",
+    "rgdhastertng": "Haste rating",
+    "splhitrtng": "Hit rating",
+    "mlehitrtng": "Hit rating",
+    "rgdhitrtng": "Hit rating",
+    "mastrtng": "Mastery rating",
+    "mlecritstrkrtng": "Critical strike rating",
+    "rgdcritstrkrtng": "Critical strike rating",
+    "splcritstrkrtng": "Critical strike rating",
+    "exprtng": "Expertise rating",
+    "parryrtng": "Parry rating",
+    "dodgertng": "Dodge rating",
+    "resirtng": "Resilience rating",
+    "splpen": "Spell penetration"
+}
+
+gem_specs = {
+    "Druid-Balance": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Druid-Feral": {
+        "mainstat": ["agi"],
+        "gems": [["agi"],["agi","splhitrtng","mlehitrtng","rgdhitrtng"],["agi","mastrtng"]]
+    },
+    "Druid-Guardian": {
+        "mainstat": ["sta","agi"],
+        "gems": [["sta"],["mastrtng","sta"]]
+    },
+    "Druid-Restoration": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Shaman-Elemental": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Shaman-Enhancement": {
+        "mainstat": ["agi"],
+        "gems": [["agi"],["agi","splhitrtng","mlehitrtng","rgdhitrtng"],["agi","mastrtng"]]
+    },
+    "Shaman-Restoration": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Rogue-Assassination": {
+        "mainstat": ["agi"],
+        "gems": [["agi"],["agi","splhitrtng","mlehitrtng","rgdhitrtng"],["agi","mastrtng"]]
+    },
+    "Rogue-Combat": {
+        "mainstat": ["agi"],
+        "gems": [["agi"],["agi","splhitrtng","mlehitrtng","rgdhitrtng"],["agi","mastrtng"],["agi","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Rogue-Subtlety": {
+        "mainstat": ["agi"],
+        "gems": [["agi"],["agi","splhitrtng","mlehitrtng","rgdhitrtng"],["agi","mastrtng"],["agi","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Priest-Shadow": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Priest-Discipline": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Priest-Holy": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Mage-Fire": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"],["int","splhitrtng","mlehitrtng","rgdhitrtng"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Mage-Frost": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"],["int","splhitrtng","mlehitrtng","rgdhitrtng"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Mage-Arcane": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","mastrtng"],["int","splhitrtng","mlehitrtng","rgdhitrtng"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Hunter-Survival": {
+        "mainstat": ["agi"],
+        "gems": [["agi"],["agi","splhitrtng","mlehitrtng","rgdhitrtng"],["agi","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"]]
+    },
+    "Hunter-Marksmanship": {
+        "mainstat": ["agi"],
+        "gems": [["agi"],["agi","splhitrtng","mlehitrtng","rgdhitrtng"],["agi","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"]]
+    },
+    "Hunter-Beastmastery": {
+        "mainstat": ["agi"],
+        "gems": [["agi"],["agi","splhitrtng","mlehitrtng","rgdhitrtng"],["agi","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"]]
+    },
+    "DeathKnight-Unholy": {
+        "mainstat": ["str"],
+        "gems": [["str"],["str","splhastertng","mlehastertng","rgdhastertng"],["str","splhitrtng","mlehitrtng","rgdhitrtng"]]
+    },
+    "DeathKnight-Blood": {
+        "mainstat": ["str","sta"],
+        "gems": [["mastrtng","sta"],["exprtng","sta"],["sta"],["exprtng","mastrtng"],["mastrtng"]]
+    }, 
+    "DeathKnight-Frost": {
+        "mainstat": ["str"],
+        "gems": [["str"],["str","splhitrtng","mlehitrtng","rgdhitrtng"],["str","splhastertng","mlehastertng","rgdhastertng"],["str","mastrtng"]]
+    },  
+    "Warrior-Arms": {
+        "mainstat": ["str"],
+        "gems": [["str"],["str","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"]]
+    },
+    "Warrior-Fury": {
+        "mainstat": ["str"],
+        "gems": [["str"],["str","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"]]
+    },
+    "Warrior-Protection": {
+        "mainstat": ["str","sta"],
+        "gems": [["sta"],["sta","mastrtng"],["sta","parryrtng"]]
+    },
+    "Warlock-Demonology": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","splhitrtng","mlehitrtng","rgdhitrtng"],["int","mastrtng"]]
+    },
+    "Warlock-Affliction": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","splhitrtng","mlehitrtng","rgdhitrtng"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Warlock-Destruction": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","splhitrtng","mlehitrtng","rgdhitrtng"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Paladin-Holy": {
+        "mainstat": ["int"],
+        "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
+    },
+    "Paladin-Retribution": {
+        "mainstat": ["str"],
+        "gems": [["str"],["str","mastrtng"],["exprtng","splhitrtng","mlehitrtng","rgdhitrtng"],["str","splhitrtng","mlehitrtng","rgdhitrtng"]]
+    },
+    "Paladin-Protection": {
+        "mainstat": ["str","sta"],
+        "gems": [["mastrtng"],["sta"],["mastrtng","sta"],["exprtng","mastrtng"],["exprtng","sta"]]
+    }
 }
 
 roles = {
@@ -71,7 +224,6 @@ class_types = {
 spec_stats = {
     "Guardian": "agility"
 }
-
 
 item_cache = {}
 with open("cataclysm/items.json", "r") as f:
@@ -246,8 +398,21 @@ def check_gear(character, zone):
                     if len(existing_item) == 0:
                         professions["jewelcrafting"]["items"].append(item)
                 
-                # Only add actual colored gems
+                # Ignore cogwheel gems
                 if gem_stats["color"] != 10 :
+                    total_attributes = []
+                    # Get all gem attributes
+                    for attr in gem_attributes:
+                        if gem_stats.get(attr) is not None:
+                            total_attributes.append(attr)
+                    # Check if gem is a useful stat
+                    if not any([all([attr in spec_atr for attr in total_attributes]) for spec_atr in gem_specs[f"{character['type']}-{spec}"]["gems"]]):
+                        if not any([attr in gem_specs[f"{character['type']}-{spec}"]["mainstat"] for attr in total_attributes]):
+                            output["major"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a gem that is not mainstat\n"
+                        else:
+                            attribute_string = " & ".join(set([attribute_locale.get(attr) for attr in total_attributes]))
+                            output["minor"] += f"{item.get('name', '')} ({slots[item['slot']]}) has a non-optimal gem ({attribute_string})\n"
+                    # Add color of gem to total sockets
                     for color in gem_class[gem_stats["color"]]:
                         sockets[color] += 1
                 # Check if resilience rating on gem
