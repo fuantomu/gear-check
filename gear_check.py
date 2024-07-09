@@ -79,6 +79,26 @@ attribute_locale = {
     "splpen": "Spell penetration"
 }
 
+armor_type = {
+    "Druid": 2,
+    "Rogue": 2,
+    "Priest": 1,
+    "Warrior": 4,
+    "Paladin": 4,
+    "Warlock": 1,
+    "Hunter": 3,
+    "DeathKnight": 4,
+    "Shaman": 3,
+    "Mage": 1,
+}
+
+locale_armor_type = {
+    1: "Cloth",
+    2: "Leather",
+    3: "Mail",
+    4: "Plate"
+}
+
 gem_specs = {
     "Druid-Balance": {
         "mainstat": ["int"],
@@ -440,6 +460,10 @@ def check_gear(character, zone):
         if item_stats['slot'] in [12,13]:
             if item_stats["id"] in [58483,68775,68776,68777]:
                 professions["alchemy"]["found"] +=1
+        
+        # Check for incorrect armor type
+        if item_stats['slot'] in [0,2,4,5,6,7,8,9] and item_stats['subclass'] != armor_type[character['type']]:
+            output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is not the correct armor type ({locale_armor_type[item_stats['subclass']]})\n"
 
     total_professions = [profession[0].capitalize() for profession in professions.items() if profession[1]["found"] > 0]
     for profession in professions.items():
