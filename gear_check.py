@@ -54,6 +54,8 @@ gem_class = {
     10: [] # Cogwheel
 }
 
+main_attributes = ["int","str","agi","spi"]
+
 gem_attributes = ["int","str","agi","spi","sta","splhastertng","mlehastertng","rgdhastertng","splhitrtng","mlehitrtng","rgdhitrtng","mastrtng","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng","exprtng","parryrtng","dodgertng","resirtng","splpen"]
 
 attribute_locale = {
@@ -99,7 +101,7 @@ locale_armor_type = {
     4: "Plate"
 }
 
-gem_specs = {
+spec_attributes = {
     "Druid-Balance": {
         "mainstat": ["int"],
         "gems": [["int"],["int","spi"],["int","splhastertng","mlehastertng","rgdhastertng"]]
@@ -432,8 +434,8 @@ def check_gear(character, zone):
                         if gem_stats.get(attr) is not None:
                             total_attributes.append(attr)
                     # Check if gem is a useful stat
-                    if not any([all([attr in spec_atr for attr in total_attributes]) for spec_atr in gem_specs[f"{character['type']}-{spec}"]["gems"]]):
-                        if not any([attr in gem_specs[f"{character['type']}-{spec}"]["mainstat"] for attr in total_attributes]):
+                    if not any([all([attr in spec_atr for attr in total_attributes]) for spec_atr in spec_attributes[f"{character['type']}-{spec}"]["gems"]]):
+                        if not any([attr in spec_attributes[f"{character['type']}-{spec}"]["mainstat"] for attr in total_attributes]):
                             output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not mainstat\n"
                         else:
                             attribute_string = " & ".join(set([attribute_locale.get(attr) for attr in total_attributes]))
@@ -464,6 +466,17 @@ def check_gear(character, zone):
         # Check for incorrect armor type
         if item_stats['slot'] in [0,2,4,5,6,7,8,9] and item_stats['subclass'] != armor_type[character['type']]:
             output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is not the correct armor type ({locale_armor_type[item_stats['subclass']]})\n"
+        
+        
+        item_primary_attribute = None
+        # Get all item attributes
+        for attr in main_attributes:
+            if item_stats.get(attr) is not None:
+                item_primary_attribute = attr
+                break
+        # Check for incorrect primary stat
+        if item_primary_attribute and all([attr not in item_primary_attribute for attr in spec_attributes[f"{character['type']}-{spec}"]["mainstat"]]):
+            output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is not the correct primary stat ({attribute_locale[item_primary_attribute]})\n"
 
     total_professions = [profession[0].capitalize() for profession in professions.items() if profession[1]["found"] > 0]
     for profession in professions.items():
@@ -488,7 +501,7 @@ def check_gear(character, zone):
                         output["major"] += f"Missing Cloak/Leg leatherworking enchant\n"
                     
             if profession[0] == "tailoring" and profession[1]['found'] < 2:
-                other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4110,4112] or (other_enchant.get("permanentEnchant") in [4122,4124,4126,4127,4126,4270,4439,4440] and spec in roles["physical"])]
+                other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4110,4112] or (other_enchant.get("permanentEnchant") in [4122,4124,4126,4127,4126,4270,4439,4440] and (spec in roles["physical"] or spec in roles["tank"]))]
                 if len(other_leg_enchant) == 0:
                     try:
                         output["major"] += f"{profession[1]['items'][0]['name']} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
