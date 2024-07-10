@@ -221,6 +221,7 @@ async def update_gear_sheet(service, spreadsheetId, gear, zone, sheet_title = "S
     players.extend([character for character in gear.get("tanks", {}) if character.get("combatantInfo") != {}])
     players.extend([character for character in gear.get("healers",{}) if character.get("combatantInfo") != {}])
     players.extend([character for character in gear.get("dps", {}) if character.get("combatantInfo") != {}])
+    players = sorted(players, key=lambda p: (p["type"], p["name"]))
     
     load_enchants()
     
