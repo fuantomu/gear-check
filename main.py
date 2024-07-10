@@ -397,9 +397,9 @@ def update_cell_width(service, spreadsheetId):
         {"columnNumber": 1, "width": 180},
         {"columnNumber": 2, "width": 120},
         {"columnNumber": 3, "width": 120},
-        {"columnNumber": 4, "width": 600},
-        {"columnNumber": 5, "width": 600},
-        {"columnNumber": 6, "width": 600},
+        {"columnNumber": 4, "width": 450},
+        {"columnNumber": 5, "width": 450},
+        {"columnNumber": 6, "width": 450},
     ]
     request_body = [
         {
