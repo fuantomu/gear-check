@@ -437,7 +437,7 @@ def check_gear(character, zone):
                 # Check if gem is a useful stat
                 if not any([all([attr in spec_atr for attr in total_attributes]) for spec_atr in spec_attributes[f"{character['type']}-{spec}"]["gems"]]):
                     if not any([attr in spec_attributes[f"{character['type']}-{spec}"]["mainstat"] for attr in total_attributes]):
-                        output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not mainstat\n"
+                        output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not their primary stat ({gem_stats['name']})\n"
                     else:
                         attribute_string = " & ".join(set([attribute_locale.get(attr) for attr in total_attributes]))
                         output["minor"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a non-optimal gem ({attribute_string})\n"
