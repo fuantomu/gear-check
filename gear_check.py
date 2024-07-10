@@ -302,6 +302,7 @@ def check_gear(character, zone):
         item_stats["permanentEnchant"] = item.get("permanentEnchant")
         item_stats["permanentEnchantName"] = item.get("permanentEnchantName", "Unknown name")
         item_stats["onUseEnchant"] = item.get("onUseEnchant")
+        item_stats["gems"] = item.get("gems",[])
         
         if item_stats["itemlevel"] < zone_itemlevel[zone]["min"]:
             output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is < {zone_itemlevel[zone]['min']}\n"
@@ -410,50 +411,50 @@ def check_gear(character, zone):
         if item_stats['slot'] == 5 and len(item.get("gems", [])) < item_stats.get("nsockets", 0)+1:
             output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) missing a belt buckle\n"
         
-        if item.get("gems") is not None:
-            if any([gem["itemLevel"] < 85 for gem in item["gems"]]):
-                output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a low level gem\n"
-            for gem in item["gems"]:
-                gem_stats = get_wowhead_item(gem["id"])
-                if "meta" in gem_stats.keys():
-                    meta = gem_stats
-                    continue
-                
-                # if gem requires jewelcrafting
-                if gem.get("reqskill") == 755:
-                    professions["jewelcrafting"]["found"] += 1
-                    existing_item = [found_item for found_item in professions["jewelcrafting"]["items"] if found_item["id"] == item_stats["id"]]
-                    if len(existing_item) == 0:
-                        professions["jewelcrafting"]["items"].append(item_stats)
-                
-                # Ignore cogwheel and meta gems
-                if gem_stats["subclass"] not in [6,10] :
-                    total_attributes = []
-                    # Get all gem attributes
-                    for attr in gem_attributes:
-                        if gem_stats.get(attr) is not None:
-                            total_attributes.append(attr)
-                    # Check if gem is a useful stat
-                    if not any([all([attr in spec_atr for attr in total_attributes]) for spec_atr in spec_attributes[f"{character['type']}-{spec}"]["gems"]]):
-                        if not any([attr in spec_attributes[f"{character['type']}-{spec}"]["mainstat"] for attr in total_attributes]):
-                            output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not mainstat\n"
-                        else:
-                            attribute_string = " & ".join(set([attribute_locale.get(attr) for attr in total_attributes]))
-                            output["minor"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a non-optimal gem ({attribute_string})\n"
-                    # Add color of gem to total sockets
-                    for color in gem_class[gem_stats["subclass"]]:
-                        sockets[color] += 1
-                # Check if resilience rating on gem
-                if "resirtng" in gem_stats.keys():
-                    output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a PvP gem\n"
+        for gem in item_stats["gems"]:
+            gem_stats = get_wowhead_item(gem["id"])
+            if gem_stats["itemlevel"] < 85:
+                output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a low level gem ({gem_stats['name']})\n"
+
+            if "meta" in gem_stats.keys():
+                meta = gem_stats
+                continue
+            
+            # if gem requires jewelcrafting
+            if gem_stats.get("reqskill") == 755:
+                professions["jewelcrafting"]["found"] += 1
+                existing_item = [found_item for found_item in professions["jewelcrafting"]["items"] if found_item["id"] == item_stats["id"]]
+                if len(existing_item) == 0:
+                    professions["jewelcrafting"]["items"].append(item_stats)
+            
+            # Ignore cogwheel and meta gems
+            if gem_stats["subclass"] not in [6,10] :
+                total_attributes = []
+                # Get all gem attributes
+                for attr in gem_attributes:
+                    if gem_stats.get(attr) is not None:
+                        total_attributes.append(attr)
+                # Check if gem is a useful stat
+                if not any([all([attr in spec_atr for attr in total_attributes]) for spec_atr in spec_attributes[f"{character['type']}-{spec}"]["gems"]]):
+                    if not any([attr in spec_attributes[f"{character['type']}-{spec}"]["mainstat"] for attr in total_attributes]):
+                        output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not mainstat\n"
+                    else:
+                        attribute_string = " & ".join(set([attribute_locale.get(attr) for attr in total_attributes]))
+                        output["minor"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a non-optimal gem ({attribute_string})\n"
+                # Add color of gem to total sockets
+                for color in gem_class[gem_stats["subclass"]]:
+                    sockets[color] += 1
+            # Check if resilience rating on gem
+            if "resirtng" in gem_stats.keys():
+                output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a PvP gem ({gem_stats['name']})\n"
 
         # Check if socketed gem amount is equal to socket amount in item
-        if len(item.get("gems", [])) < item_stats.get("nsockets", 0):
-            output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has {item_stats['nsockets']-len(item.get('gems', []))} empty socket(s)\n"
+        if len(item_stats["gems"]) < item_stats.get("nsockets", 0):
+            output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has {item_stats['nsockets']-len(item_stats['gems'])} empty socket(s)\n"
         
         # Find blacksmithing sockets in bracers/gloves
         if item_stats['slot'] in [8,9]:
-            if len(item.get("gems", [])) > item_stats.get("nsockets", 0):
+            if len(item_stats["gems"]) > item_stats.get("nsockets", 0):
                 professions["blacksmithing"]["found"] +=1
             else:
                 professions["blacksmithing"]["items"].append(item_stats)
