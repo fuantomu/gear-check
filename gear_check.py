@@ -502,7 +502,7 @@ def check_gear(character, zone):
                         output["major"] += f"Missing Cloak/Leg leatherworking enchant\n"
                     
             if profession[0] == "tailoring" and profession[1]['found'] < 2:
-                other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4110,4112] or (other_enchant.get("permanentEnchant") in [4122,4124,4126,4127,4126,4270,4439,4440] and (spec in roles["physical"] or spec in roles["tank"]))]
+                other_leg_enchant = [other_enchant for other_enchant in profession[1]['items'] if other_enchant.get("permanentEnchant") in [4110,4112] or (other_enchant.get("permanentEnchant") in [4122,4124,4126,4127,4126,4270,4438,4439,4440] and (spec in roles["physical"] or spec in roles["tank"]))]
                 if len(other_leg_enchant) == 0:
                     try:
                         output["major"] += f"{profession[1]['items'][0]['name']} ({slots[profession[1]['items'][0]['slot']]}) missing tailoring enchant\n"
@@ -527,7 +527,7 @@ def check_gear(character, zone):
         if id == 0:
             if item == 16 and found_items[15] != 0:
                 continue
-            output["extreme"] += f"Missing item item in {slots[item]}\n"
+            output["extreme"] += f"Missing item in {slots[item]}\n"
             
     with open("cataclysm/items.json", "w") as f:
         json.dump(item_cache, f)
