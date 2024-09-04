@@ -166,7 +166,13 @@ async def create_gear_sheet(log, gear_log):
             }
         }
         spreadsheet = service.spreadsheets().create(body=spreadsheet,fields='spreadsheetId').execute()
-        await update_gear_sheet(service, spreadsheet.get('spreadsheetId'), gear_log, log.get("zone"))
+        players = []
+        players.extend([character for character in gear_log.get("tanks", {}) if character.get("combatantInfo") != {}])
+        players.extend([character for character in gear_log.get("healers",{}) if character.get("combatantInfo") != {}])
+        players.extend([character for character in gear_log.get("dps", {}) if character.get("combatantInfo") != {}])
+        players = sorted(players, key=lambda p: (p["type"], p["name"]))
+        
+        await update_gear_sheet(service, spreadsheet.get('spreadsheetId'), players, log.get("zone"))
         
         # Connect to Google Drive and make spreadsheet public
         await update_discord_post(f"Making Google Sheet public")
