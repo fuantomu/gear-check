@@ -192,11 +192,11 @@ spec_attributes = {
     },  
     "Warrior-Arms": {
         "mainstat": ["str"],
-        "gems": [["str"],["str","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"]]
+        "gems": [["str"],["str","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"],["str","splhitrtng","mlehitrtng","rgdhitrtng"]]
     },
     "Warrior-Fury": {
         "mainstat": ["str"],
-        "gems": [["str"],["str","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"]]
+        "gems": [["str"],["str","mlecritstrkrtng","rgdcritstrkrtng","splcritstrkrtng"],["str","splhitrtng","mlehitrtng","rgdhitrtng"]]
     },
     "Warrior-Protection": {
         "mainstat": ["str","sta"],
