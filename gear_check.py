@@ -204,7 +204,7 @@ spec_attributes = {
     },
     "Warlock-Demonology": {
         "mainstat": ["int"],
-        "gems": [["int"],["int","splhitrtng","mlehitrtng","rgdhitrtng"],["int","mastrtng"]]
+        "gems": [["int"],["int","splhitrtng","mlehitrtng","rgdhitrtng"],["int","splhastertng","mlehastertng","rgdhastertng"],["int","mastrtng"]]
     },
     "Warlock-Affliction": {
         "mainstat": ["int"],
