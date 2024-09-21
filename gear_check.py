@@ -40,6 +40,10 @@ zone_itemlevel = {
     1024: { # 10-player BWD/TOFW/BOT
         "min": 346,  
         "max": 372
+    },
+    1027: { # Firelands
+        "min": 372,
+        "max": 391
     }
 }
 
