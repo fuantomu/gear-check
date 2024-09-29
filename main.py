@@ -202,7 +202,7 @@ async def update_sheet(service, spreadsheetId, sheet_title, players):
             {
                 'range': f'{sheet_title}!A6',
                 'majorDimension': 'COLUMNS',
-                'values': [[player["name"] for player in players]]
+                'values': [[f'{player["name"]} - {player["server"]}' for player in players]]
             }
         ]
     }
@@ -344,7 +344,8 @@ def update_class_color(service, spreadsheetId, players, sheetId = 0, offsetRow =
         "Priest": {"red": 255, "green": 255, "blue": 254},
         "Shaman": {"red": 31, "green": 105, "blue": 235},
         "Paladin": {"red": 244, "green": 140, "blue": 186},
-        "DeathKnight": {"red": 196, "green": 30, "blue": 58}
+        "DeathKnight": {"red": 196, "green": 30, "blue": 58},
+        "Unknown": {"red": 255, "green": 0, "blue": 0}
     }
     request_body = [
         {

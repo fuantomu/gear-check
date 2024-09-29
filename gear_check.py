@@ -95,7 +95,7 @@ armor_type = {
     "Hunter": 3,
     "DeathKnight": 4,
     "Shaman": 3,
-    "Mage": 1,
+    "Mage": 1
 }
 
 locale_armor_type = {
@@ -278,6 +278,12 @@ def check_gear(character, zone):
         "major": "",
         "extreme": ""
     }
+    
+    if character['type'] == "Unknown":
+        print(f"Error: Character type is Unknown. Skipping character")
+        output["extreme"] += "Error during log import"
+        return output
+        
     sockets = {0:0,1:0,2:0}
     professions = {
         "enchanting": {"found": 0, "items": []}, 
