@@ -120,17 +120,15 @@ async def create_sheet(log, gear_log, sheet_title):
             }
         }
         spreadsheet = service.spreadsheets().create(body=spreadsheet,fields='spreadsheetId').execute()
-        players = []
-        players.extend([character for character in gear_log.get("tanks", {}) if character.get("combatantInfo") != {}])
-        players.extend([character for character in gear_log.get("healers",{}) if character.get("combatantInfo") != {}])
-        players.extend([character for character in gear_log.get("dps", {}) if character.get("combatantInfo") != {}])
-        players = sorted(players, key=lambda p: (p["type"], p["name"]))
+        players = get_players(gear_log)
         
         update_class_color(service, os.getenv("SOURCE_SPREADSHEET"), players, sheetId=os.getenv("SOURCE_SHEET"), offsetRow=5)
         update_class_color(service, os.getenv("SOURCE_SPREADSHEET"), players, sheetId=os.getenv("SOURCE_SHEET"), offsetRow=5, offsetColumnStart=6, offsetColumnEnd=11)
         copy_sheet = service.spreadsheets().sheets().copyTo(spreadsheetId = os.getenv("SOURCE_SPREADSHEET"), sheetId=os.getenv("SOURCE_SHEET"),body={"destinationSpreadsheetId": spreadsheet.get('spreadsheetId')}).execute()
         service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet.get('spreadsheetId'), body={"requests": [{"updateSheetProperties":{ "properties": {"sheetId": copy_sheet.get('sheetId'), "title": sheet_title}, "fields": "title"}}]}).execute()
-        await update_sheet(service, spreadsheet.get('spreadsheetId'), sheet_title, players)
+        
+        unique_players = get_unique_players(players)
+        await update_sheet(service, spreadsheet.get('spreadsheetId'), sheet_title, unique_players)
         await update_gear_sheet(service, spreadsheet.get('spreadsheetId'), players, log.get("zone"), sheet_title="Sheet1")
         
         # Connect to Google Drive and make spreadsheet public
@@ -166,11 +164,7 @@ async def create_gear_sheet(log, gear_log):
             }
         }
         spreadsheet = service.spreadsheets().create(body=spreadsheet,fields='spreadsheetId').execute()
-        players = []
-        players.extend([character for character in gear_log.get("tanks", {}) if character.get("combatantInfo") != {}])
-        players.extend([character for character in gear_log.get("healers",{}) if character.get("combatantInfo") != {}])
-        players.extend([character for character in gear_log.get("dps", {}) if character.get("combatantInfo") != {}])
-        players = sorted(players, key=lambda p: (p["type"], p["name"]))
+        players = get_players(gear_log)
         
         await update_gear_sheet(service, spreadsheet.get('spreadsheetId'), players, log.get("zone"))
         
@@ -558,6 +552,27 @@ async def update_discord_post(msg):
     global current_message
     if current_message is not None:
         await current_message.edit(content=msg)
+        
+def get_players(gear_log):
+    players = []
+    players.extend([character for character in gear_log.get("tanks", {}) if character.get("combatantInfo") != {}])
+    players.extend([character for character in gear_log.get("healers",{}) if character.get("combatantInfo") != {}])
+    players.extend([character for character in gear_log.get("dps", {}) if character.get("combatantInfo") != {}])
+    players = sorted(players, key=lambda p: (p["type"], p["name"]))
+    return players
+
+def get_unique_players(players):
+    seen = []
+    unique_players = []
+    for x in players:
+        if x["name"] not in seen:
+            unique_players.append({
+                "type": x["type"],
+                "name": x["name"],
+                "server": x["server"]
+            })
+            seen.append(x["name"])
+    return unique_players
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -569,11 +584,8 @@ if __name__ == "__main__":
         # buff_log = get_log_buffs(sys.argv[1])
         loop = asyncio.get_event_loop()
         
-        players = []
-        players.extend([character for character in gear_log.get("tanks", {}) if character.get("combatantInfo") != {}])
-        players.extend([character for character in gear_log.get("healers",{}) if character.get("combatantInfo") != {}])
-        players.extend([character for character in gear_log.get("dps", {}) if character.get("combatantInfo") != {}])
-        players = sorted(players, key=lambda p: (p["type"], p["name"]))
+        players = get_players(gear_log)
+
         issues = loop.run_until_complete(update_gear_sheet(None,None,players, log.get("zone")))
         for issue in issues:
             print("###################################################")
