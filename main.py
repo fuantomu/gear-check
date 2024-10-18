@@ -202,7 +202,7 @@ async def update_sheet(service, spreadsheetId, sheet_title, players):
             {
                 'range': f'{sheet_title}!A6',
                 'majorDimension': 'COLUMNS',
-                'values': [[f'{player["name"]} - {player["server"]}' for player in players]]
+                'values': [[f'{player["name"]}-{player["server"]}' for player in players]]
             }
         ]
     }
@@ -568,7 +568,13 @@ if __name__ == "__main__":
         gear_log = get_log_summary(sys.argv[1])
         # buff_log = get_log_buffs(sys.argv[1])
         loop = asyncio.get_event_loop()
-        issues = loop.run_until_complete(update_gear_sheet(None,None, gear_log, log.get("zone")))
+        
+        players = []
+        players.extend([character for character in gear_log.get("tanks", {}) if character.get("combatantInfo") != {}])
+        players.extend([character for character in gear_log.get("healers",{}) if character.get("combatantInfo") != {}])
+        players.extend([character for character in gear_log.get("dps", {}) if character.get("combatantInfo") != {}])
+        players = sorted(players, key=lambda p: (p["type"], p["name"]))
+        issues = loop.run_until_complete(update_gear_sheet(None,None,players, log.get("zone")))
         for issue in issues:
             print("###################################################")
             print(f"{issue[0]}\n")

@@ -321,7 +321,7 @@ def check_gear(character, zone):
         if "resirtng" in item_stats.keys():
             output["major"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is a PvP item\n"
         
-        if item_stats['slot'] not in ignore_enchant:
+        if item_stats['slot'] not in ignore_enchant or (item_stats['slot'] == 17 and character['type'] == "Hunter"):
             if item_stats["permanentEnchant"] is None: 
                 if not item_stats['slot'] in [10,11]: # if ring, ignore the no enchant rule
                     output["extreme"] += f"{item_stats['name']} ({slots[item_stats['slot']]}) missing enchant\n"
