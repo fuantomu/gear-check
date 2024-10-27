@@ -216,17 +216,22 @@ def update_damage_done(service, spreadsheetId, encounter, enemies):
 
     current_idx = 0
     for idx, entry in enumerate_step(encounter["mechanics"][0], step=2):
+        print(f'Checking damage of player {entry["playerName"]}')
         for _, enemy in enumerate(entry.get("damage-done", [])):
             ranking["damage-done"][enemy["enemyId"]][entry["playerName"]] = {
                 "totalDamage": enemy.get("totalDamage", 0),
                 "activeTime": enemy.get("activeTime", 0),
             }
+            seconds, _ = divmod(int(enemy.get("activeTime", 0)), 1000)
             request_body["data"].append(
                 {
                     "range": f"{encounter['name']}!{enemies[enemy['enemyId']]}{3+idx}",
                     "majorDimension": "COLUMNS",
                     "values": [
-                        [enemy.get("totalDamage", 0), enemy.get("activeTime", 0)]
+                        [
+                            enemy.get("totalDamage", 0),
+                            f"{divmod(seconds,60)[0]:02d}:{divmod(seconds,60)[1]:02d}",
+                        ]
                     ],
                 }
             )

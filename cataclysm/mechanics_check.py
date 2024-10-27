@@ -91,29 +91,51 @@ def check_encounter(report, fight):
             if not type_included:
                 break
 
-            found_source = None
-            found_target = None
-            log_event, key = condition[1].split(",")
-            for event in player[log_event]:
-                if str(event.get("enemyGuid")) == condition[2]:
-                    found_source = event[key]
-                if str(event.get("enemyGuid")) == condition[4]:
-                    found_target = event[key]
-                if found_source and found_target:
-                    break
+            results = []
+            for source in condition[2].split(","):
+                found_source = None
+                found_target = None
+                log_event, key = condition[1].split(",")
 
-            if found_source is not None and found_target is not None:
-                result = eval(f"{found_source}{condition[3]}{found_target}")
-                if not result:
-                    player["failedConditions"].append(
-                        {
-                            "name": condition[5],
-                            "description": condition[6],
-                            "event": log_event,
-                            "enemyId": event["enemyId"],
-                            "enemyGuid": event["enemyGuid"],
-                        }
-                    )
+                for event in player[log_event]:
+                    if str(event.get("enemyGuid")) == source:
+                        found_source = event[key]
+                    if str(event.get("enemyGuid")) == condition[4]:
+                        found_target = event[key]
+                    if found_source and found_target:
+                        break
+
+                if found_source is not None and found_target is not None:
+
+                    if "diff" in condition[3]:
+                        if found_source > found_target:
+                            results.append(False)
+                        else:
+                            difference = (
+                                abs(int(found_target) - int(found_source))
+                                / found_source
+                            ) * 100.0
+
+                            _, evaluation, check_diff = condition[3].split(" ")
+                            results.append(
+                                eval(f"{difference}{evaluation}{check_diff}")
+                            )
+                    else:
+                        results.append(
+                            eval(f"{found_source}{condition[3]}{found_target}")
+                        )
+
+            if all(results):
+
+                player["failedConditions"].append(
+                    {
+                        "name": condition[5],
+                        "description": condition[6],
+                        "event": log_event,
+                        "enemyId": event["enemyId"],
+                        "enemyGuid": event["enemyGuid"],
+                    }
+                )
 
     return activity, enemies
 
