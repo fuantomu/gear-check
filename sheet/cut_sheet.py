@@ -1,11 +1,13 @@
 from helper.credentials import get_creds
 from helper.getter import get_players, get_unique_players
-from helper.discord import update_discord_post
+from helper.discord import send_discord_post, update_discord_post
 from sheet.gear_sheet import update_gear_sheet
-from sheet.general import update_class_color
+from sheet.general import find_sheet_id, get_sheet_ids, update_class_color
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 import os
+
+_sheets = None
 
 
 async def create_sheet(log, gear_log, sheet_title):
@@ -24,6 +26,10 @@ async def create_sheet(log, gear_log, sheet_title):
         players = get_players(gear_log)
         unique_players = get_unique_players(players)
 
+        await send_discord_post(
+            f"https://docs.google.com/spreadsheets/d/{spreadsheet.get('spreadsheetId')}/edit#gid=0"
+        )
+
         update_class_color(
             service,
             os.getenv("SOURCE_SPREADSHEET"),
@@ -34,7 +40,7 @@ async def create_sheet(log, gear_log, sheet_title):
         update_class_color(
             service,
             os.getenv("SOURCE_SPREADSHEET"),
-            players,
+            unique_players,
             sheetId=os.getenv("SOURCE_SHEET"),
             offsetRow=5,
             offsetColumnStart=6,
@@ -50,6 +56,10 @@ async def create_sheet(log, gear_log, sheet_title):
             )
             .execute()
         )
+
+        global _sheets
+        _sheets = get_sheet_ids(service, spreadsheet.get("spreadsheetId"))
+
         service.spreadsheets().batchUpdate(
             spreadsheetId=spreadsheet.get("spreadsheetId"),
             body={
@@ -62,24 +72,16 @@ async def create_sheet(log, gear_log, sheet_title):
                             },
                             "fields": "title",
                         }
-                    }
-                ]
-            },
-        ).execute()
-
-        service.spreadsheets().batchUpdate(
-            spreadsheetId=spreadsheet.get("spreadsheetId"),
-            body={
-                "requests": [
+                    },
                     {
                         "updateSheetProperties": {
                             "properties": {
-                                "sheetId": 0,
+                                "sheetId": find_sheet_id(_sheets, "Sheet1"),
                                 "title": "Gearcheck",
                             },
                             "fields": "title",
                         }
-                    }
+                    },
                 ]
             },
         ).execute()
@@ -117,7 +119,10 @@ async def create_sheet(log, gear_log, sheet_title):
             fields="id",
         ).execute()
 
-        return spreadsheet.get("spreadsheetId"), copy_sheet.get("sheetId")
+        await update_discord_post(
+            f"Finished processing cutsheet for {len(players)} player(s)"
+        )
+
     except HttpError as error:
         print(f"An error occurred: {error}")
 

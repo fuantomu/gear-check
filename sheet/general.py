@@ -45,6 +45,29 @@ def update_class_color(
         }
         for index, player in enumerate(players)
     ]
+    request_body.append(
+        {
+            "repeatCell": {
+                "cell": {
+                    "userEnteredFormat": {
+                        "backgroundColor": {
+                            "red": 1,
+                            "green": 1,
+                            "blue": 1,
+                        }
+                    }
+                },
+                "fields": "userEnteredFormat.backgroundColor",
+                "range": {
+                    "sheetId": sheetId,
+                    "startRowIndex": len(players) + offsetRow,
+                    "endRowIndex": len(players) + offsetRow + 15,
+                    "startColumnIndex": offsetColumnStart,
+                    "endColumnIndex": offsetColumnEnd + 1,
+                },
+            }
+        }
+    )
 
     body = {"requests": request_body}
 
@@ -79,7 +102,7 @@ def update_background_color(service, spreadsheetId, range, color, sheetId=0):
     service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
-def update_cell_width(service, spreadsheetId):
+def update_cell_width(service, spreadsheetId, sheetId=0):
     column_widths = [
         {"columnNumber": 1, "width": 180},
         {"columnNumber": 2, "width": 120},
@@ -94,7 +117,7 @@ def update_cell_width(service, spreadsheetId):
                 "properties": {"pixelSize": e["width"]},
                 "range": {
                     "dimension": "COLUMNS",
-                    "sheetId": 0,
+                    "sheetId": sheetId,
                     "startIndex": e["columnNumber"] - 1,
                     "endIndex": e["columnNumber"],
                 },
@@ -108,12 +131,12 @@ def update_cell_width(service, spreadsheetId):
     service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
-def update_wrap(service, spreadsheetId, range):
+def update_wrap(service, spreadsheetId, range, sheetId=0):
     request_body = [
         {
             "repeatCell": {
                 "range": {
-                    "sheetId": 0,
+                    "sheetId": sheetId,
                     "startRowIndex": range.get("row_start", 0),
                     "endRowIndex": range.get("row_end", range.get("row_start", 0) + 1),
                     "startColumnIndex": range.get("column_start", 0),
@@ -129,12 +152,12 @@ def update_wrap(service, spreadsheetId, range):
     service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
-def update_text_format(service, spreadsheetId, range):
+def update_text_format(service, spreadsheetId, range, sheetId=0):
     request_body = [
         {
             "repeatCell": {
                 "range": {
-                    "sheetId": 0,
+                    "sheetId": sheetId,
                     "startRowIndex": range.get("row_start", 0),
                     "endRowIndex": range.get("row_end", range.get("row_start", 0) + 1),
                     "startColumnIndex": range.get("column_start", 0),
@@ -151,7 +174,7 @@ def update_text_format(service, spreadsheetId, range):
         {
             "repeatCell": {
                 "range": {
-                    "sheetId": 0,
+                    "sheetId": sheetId,
                     "startRowIndex": 0,
                     "endRowIndex": 1,
                     "startColumnIndex": 0,
@@ -171,12 +194,12 @@ def update_text_format(service, spreadsheetId, range):
     service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
-def update_alignment(service, spreadsheetId, range):
+def update_alignment(service, spreadsheetId, range, sheetId=0):
     request_body = [
         {
             "repeatCell": {
                 "range": {
-                    "sheetId": 0,
+                    "sheetId": sheetId,
                     "startRowIndex": range.get("row_start", 0),
                     "endRowIndex": range.get("row_end", range.get("row_start", 0) + 1),
                     "startColumnIndex": range.get("column_start", 0),

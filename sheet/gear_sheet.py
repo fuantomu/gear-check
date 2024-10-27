@@ -1,10 +1,12 @@
 from gear_check import check_gear, load_enchants
 from helper.credentials import get_creds
 from helper.getter import get_players
-from helper.discord import update_discord_post
+from helper.discord import send_discord_post, update_discord_post
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 from sheet.general import (
+    find_sheet_id,
+    get_sheet_ids,
     update_alignment,
     update_background_color,
     update_cell_width,
@@ -12,6 +14,8 @@ from sheet.general import (
     update_text_format,
     update_wrap,
 )
+
+_sheets = None
 
 
 async def create_gear_sheet(log, gear_log):
@@ -29,6 +33,13 @@ async def create_gear_sheet(log, gear_log):
         )
         players = get_players(gear_log)
 
+        await send_discord_post(
+            f"https://docs.google.com/spreadsheets/d/{spreadsheet.get('spreadsheetId')}/edit#gid=0"
+        )
+
+        global _sheets
+        _sheets = get_sheet_ids(service, spreadsheet.get("spreadsheetId"))
+
         service.spreadsheets().batchUpdate(
             spreadsheetId=spreadsheet.get("spreadsheetId"),
             body={
@@ -36,7 +47,7 @@ async def create_gear_sheet(log, gear_log):
                     {
                         "updateSheetProperties": {
                             "properties": {
-                                "sheetId": 0,
+                                "sheetId": find_sheet_id(_sheets, "Sheet1"),
                                 "title": "Gearcheck",
                             },
                             "fields": "title",
@@ -76,7 +87,10 @@ async def create_gear_sheet(log, gear_log):
             fields="id",
         ).execute()
 
-        return spreadsheet.get("spreadsheetId")
+        await update_discord_post(
+            f"Finished processing gear of {len(players)} player(s)"
+        )
+
     except HttpError as error:
         print(f"An error occurred: {error}")
 
@@ -174,7 +188,12 @@ async def update_gear_sheet(
     except:
         return zip([player["name"] for player in players], gear_issues)
 
-    update_class_color(service, spreadsheetId, players)
+    global _sheets
+    if _sheets is None:
+        _sheets = get_sheet_ids(service, spreadsheetId)
+    sheet_id = find_sheet_id(_sheets, sheet_title)
+
+    update_class_color(service, spreadsheetId, players, sheetId=sheet_id)
     update_background_color(
         service,
         spreadsheetId,
@@ -185,6 +204,7 @@ async def update_gear_sheet(
             "column_end": 4,
         },
         {"red": 1, "green": 1, "blue": 0},
+        sheetId=sheet_id,
     )
     update_background_color(
         service,
@@ -196,6 +216,7 @@ async def update_gear_sheet(
             "column_end": 5,
         },
         {"red": 1, "green": 0.6, "blue": 0},
+        sheetId=sheet_id,
     )
     update_background_color(
         service,
@@ -207,8 +228,9 @@ async def update_gear_sheet(
             "column_end": 6,
         },
         {"red": 0.918, "green": 0.3412, "blue": 0.3412},
+        sheetId=sheet_id,
     )
-    update_cell_width(service, spreadsheetId)
+    update_cell_width(service, spreadsheetId, sheetId=sheet_id)
     update_wrap(
         service,
         spreadsheetId,
@@ -218,6 +240,7 @@ async def update_gear_sheet(
             "column_start": 1,
             "column_end": 6,
         },
+        sheetId=sheet_id,
     )
     update_text_format(
         service,
@@ -228,11 +251,13 @@ async def update_gear_sheet(
             "column_start": 0,
             "column_end": 6,
         },
+        sheetId=sheet_id,
     )
     update_alignment(
         service,
         spreadsheetId,
         {"row_start": 0, "row_end": 1, "column_start": 0, "column_end": 6},
+        sheetId=sheet_id,
     )
     update_alignment(
         service,
@@ -243,4 +268,5 @@ async def update_gear_sheet(
             "column_start": 0,
             "column_end": 3,
         },
+        sheetId=sheet_id,
     )
