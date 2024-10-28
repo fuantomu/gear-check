@@ -1,0 +1,24 @@
+[{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 81689,
+    "ability-name": "Corrupting Crash",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 81538,
+    "ability-name": "Blaze",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "interrupts",
+    "ability-id": 81713,
+    "ability-name": "Depravity",
+    "start": 0,
+    "end": -1
+}]

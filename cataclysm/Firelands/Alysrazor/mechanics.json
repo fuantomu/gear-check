@@ -1,0 +1,22 @@
+[{
+    "hostility": "friendly",
+    "event-type": "interrupts",
+    "ability-id": 98868,
+    "ability-name": "Brushfire",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "interrupts",
+    "ability-id": 101223,
+    "ability-name": "Fieroblast",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "interrupts",
+    "ability-id": 99919,
+    "ability-name": "Ignition",
+    "start": 0,
+    "end": -1
+}]

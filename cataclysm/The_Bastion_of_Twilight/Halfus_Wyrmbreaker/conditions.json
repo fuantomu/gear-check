@@ -1,1 +1,2 @@
-[["!Rogue,!Mage,!Shaman","damage-done,totalDamage","44650,44645","diff >= 60","44600","HalfusFocus","Player focused on Halfus instead of Storm Rider"]]
+[["!Rogue,!Mage,!Shaman","damage-done,totalDamage","44650,44645","diff >= 60","44600","HalfusFocus","Player focused on Halfus instead of Storm Rider"],
+["","damage-taken,totalDamage","83734",">=","250000","MeteorBarrage","Player stood in a lot of avoidable Fireball barrages"]]

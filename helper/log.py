@@ -32,7 +32,7 @@ def get_log_events(report: str, **kwargs):
     # url = f'{url}{kwargs.get("start", 0)}&end={kwargs.get("end", 999999999)}'
 
     url = f'{url}api_key={os.getenv("WCL_USERID")}'
-    # print(url)
+    print(url)
     log_data = requests.get(url)
     # print(len(log_data.json().get("entries")))
     return log_data.json()
@@ -59,7 +59,7 @@ def get_log_v2(report: str):
         json={"query": body},
         headers={"Authorization": f"Bearer {token}"},
     )
-    print(result.text)
+    # print(result.text)
 
 
 def get_wcl_oauth():

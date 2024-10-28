@@ -39,4 +39,12 @@
     "start": 0,
     "end": 66,
     "options": 8192
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 83734,
+    "ability-name": "Fireball Barrage",
+    "by": "ability",
+    "start": 0,
+    "end": -1
 }]
