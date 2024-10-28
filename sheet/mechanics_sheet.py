@@ -119,6 +119,16 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
         "valueInputOption": "USER_ENTERED",
         "data": [],
     }
+    format_request = {"requests": []}
+
+    request_body["data"].append(
+        {
+            "range": f"{main_sheet}!A1",
+            "majorDimension": "COLUMNS",
+            "values": [["Encounters"]],
+        }
+    )
+
     for idx, encounter in enumerate(encounters):
         request_body["data"].append(
             {
@@ -146,7 +156,7 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 idx + 1
             ]
             last_column = idx + 1
-        print(f"{enemy_columns}, {last_column}")
+        # print(f"{enemy_columns}, {last_column}")
 
         damage_done_fails = {}
         damage_done_bonus = 0
@@ -154,6 +164,16 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
             damage_done_bonus = 1
             request_body["data"].extend(
                 [
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(enemy_columns)]}1",
+                        "majorDimension": "ROWS",
+                        "values": [[f"Damage Done"]],
+                    },
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(enemy_columns)]}2",
+                        "majorDimension": "ROWS",
+                        "values": [[f"Active Time"]],
+                    },
                     {
                         "range": f"{encounter['name']}!{characters[last_column-len(enemy_columns)+1]}1",
                         "majorDimension": "ROWS",
@@ -176,7 +196,33 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                     },
                 ]
             )
-
+            format_request["requests"].extend(
+                [
+                    {
+                        "repeatCell": {
+                            "range": {
+                                "sheetId": find_sheet_id(_sheets, encounter["name"]),
+                                "startRowIndex": 0,
+                                "endRowIndex": 2,
+                                "startColumnIndex": last_column - len(enemy_columns),
+                                "endColumnIndex": last_column - len(enemy_columns) + 1,
+                            },
+                            "cell": {
+                                "userEnteredFormat": {
+                                    "backgroundColor": {
+                                        "red": 75 / 255,
+                                        "green": 133 / 255,
+                                        "blue": 255 / 255,
+                                    },
+                                    "horizontalAlignment": "CENTER",
+                                    "textFormat": {"fontSize": 14, "bold": True},
+                                }
+                            },
+                            "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+                        }
+                    }
+                ]
+            )
             damage_done_fails = update_damage_done(
                 service, spreadsheetId, encounter, enemy_columns
             )
@@ -211,7 +257,7 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 characters[idx + 1 + len(enemy_columns) + damage_done_bonus]
             )
             last_column = idx + 1 + len(enemy_columns) + damage_done_bonus
-        print(f"{ability_columns}, {last_column}")
+        # print(f"{ability_columns}, {last_column}")
 
         damage_taken_bonus = 0
         damage_taken_fails = {}
@@ -219,6 +265,11 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
             damage_taken_bonus = 1
             request_body["data"].extend(
                 [
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(ability_columns)]}1",
+                        "majorDimension": "ROWS",
+                        "values": [[f"Damage Taken"]],
+                    },
                     {
                         "range": f"{encounter['name']}!{characters[last_column-len(ability_columns)+1]}1",
                         "majorDimension": "ROWS",
@@ -228,6 +279,35 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                                 for key in ability_columns
                             ]
                         ],
+                    },
+                ]
+            )
+            format_request["requests"].extend(
+                [
+                    {
+                        "repeatCell": {
+                            "range": {
+                                "sheetId": find_sheet_id(_sheets, encounter["name"]),
+                                "startRowIndex": 0,
+                                "endRowIndex": 2,
+                                "startColumnIndex": last_column - len(ability_columns),
+                                "endColumnIndex": last_column
+                                - len(ability_columns)
+                                + 1,
+                            },
+                            "cell": {
+                                "userEnteredFormat": {
+                                    "backgroundColor": {
+                                        "red": 75 / 255,
+                                        "green": 133 / 255,
+                                        "blue": 255 / 255,
+                                    },
+                                    "horizontalAlignment": "CENTER",
+                                    "textFormat": {"fontSize": 14, "bold": True},
+                                }
+                            },
+                            "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+                        }
                     }
                 ]
             )
@@ -256,11 +336,21 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 + damage_taken_bonus
             )
 
-        print(f"{interrupt_columns}, {last_column}")
+        # print(f"{interrupt_columns}, {last_column}")
 
         if len(encounter["mechanics"][3]) > 0:
             request_body["data"].extend(
                 [
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(interrupt_columns)]}1",
+                        "majorDimension": "ROWS",
+                        "values": [[f"Interrupts"]],
+                    },
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(interrupt_columns)]}2",
+                        "majorDimension": "ROWS",
+                        "values": [[f"Kicked/Total Casts"]],
+                    },
                     {
                         "range": f"{encounter['name']}!{characters[last_column-len(interrupt_columns)+1]}1",
                         "majorDimension": "ROWS",
@@ -281,6 +371,36 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                             ]
                         ],
                     },
+                ]
+            )
+            format_request["requests"].extend(
+                [
+                    {
+                        "repeatCell": {
+                            "range": {
+                                "sheetId": find_sheet_id(_sheets, encounter["name"]),
+                                "startRowIndex": 0,
+                                "endRowIndex": 2,
+                                "startColumnIndex": last_column
+                                - len(interrupt_columns),
+                                "endColumnIndex": last_column
+                                - len(interrupt_columns)
+                                + 1,
+                            },
+                            "cell": {
+                                "userEnteredFormat": {
+                                    "backgroundColor": {
+                                        "red": 75 / 255,
+                                        "green": 133 / 255,
+                                        "blue": 255 / 255,
+                                    },
+                                    "horizontalAlignment": "CENTER",
+                                    "textFormat": {"fontSize": 14, "bold": True},
+                                }
+                            },
+                            "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+                        }
+                    }
                 ]
             )
             update_interrupts(service, spreadsheetId, encounter, interrupt_columns)
@@ -312,6 +432,84 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 ).execute()
         except Exception as e:
             print(e)
+
+        # Automatically resize all columns in encounter sheet
+        format_request["requests"].append(
+            {
+                "autoResizeDimensions": {
+                    "dimensions": {
+                        "sheetId": find_sheet_id(_sheets, encounter["name"]),
+                        "dimension": "COLUMNS",
+                        "startIndex": 0,
+                        "endIndex": last_column + 1,
+                    }
+                }
+            }
+        )
+
+    # Format and resize columns in main sheet
+    format_request["requests"].extend(
+        [
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": find_sheet_id(_sheets, main_sheet),
+                        "startRowIndex": 0,
+                        "endRowIndex": 1,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": 1,
+                    },
+                    "cell": {
+                        "userEnteredFormat": {
+                            "backgroundColor": {
+                                "red": 75 / 255,
+                                "green": 133 / 255,
+                                "blue": 255 / 255,
+                            },
+                            "horizontalAlignment": "CENTER",
+                            "textFormat": {"fontSize": 14, "bold": True},
+                        }
+                    },
+                    "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+                }
+            },
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": find_sheet_id(_sheets, main_sheet),
+                        "startRowIndex": 0,
+                        "endRowIndex": 1,
+                        "startColumnIndex": 1,
+                        "endColumnIndex": len(encounters) + 1,
+                    },
+                    "cell": {
+                        "userEnteredFormat": {
+                            "horizontalAlignment": "CENTER",
+                            "textFormat": {"fontSize": 14, "bold": True},
+                        }
+                    },
+                    "fields": "userEnteredFormat(textFormat,horizontalAlignment)",
+                }
+            },
+            {
+                "autoResizeDimensions": {
+                    "dimensions": {
+                        "sheetId": find_sheet_id(_sheets, main_sheet),
+                        "dimension": "COLUMNS",
+                        "startIndex": 0,
+                        "endIndex": len(encounters) + 1,
+                    }
+                }
+            },
+        ]
+    )
+    # print(format_request)
+    try:
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=spreadsheetId, body=format_request
+        ).execute()
+    except Exception as e:
+        print(e)
 
     await update_discord_post(f"Finished processing {len(encounters)} encounter(s)")
 
