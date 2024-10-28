@@ -1,12 +1,10 @@
-from string import ascii_uppercase
 import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
-from cataclysm.mechanics_check import check_encounter
 from helper.log import get_log, get_log_summary
-from helper.getter import get_boss_fights, get_players
-from helper.discord import set_context, set_current_message, update_discord_post
+from helper.getter import get_players
+from helper.discord import set_context, set_current_message
 import sys
 import asyncio
 from sheet.cut_sheet import create_sheet
@@ -114,32 +112,19 @@ if __name__ == "__main__":
     else:
         # get_log_v2(sys.argv[1])
         log = get_log(sys.argv[1])
-        boss_fights = get_boss_fights(log.get("fights"))
 
-        for fight in boss_fights:
-            if fight["name"] == "Alysrazor":
-                encounter = check_encounter(sys.argv[1], fight)
+        gear_log = get_log_summary(sys.argv[1])
+        # buff_log = get_log_buffs(sys.argv[1])
+        loop = asyncio.get_event_loop()
 
-        # for x in encounter[0]:
-        #    print(x["failedConditions"])
-        # characters = list(ascii_uppercase)
-        # ability_columns = {
-        #     encounter[2][enemy]["abilityGuid"]: characters[idx + 1]
-        #     for idx, enemy in enumerate(encounter[2])
-        # }
-        # print(ability_columns)
-        # gear_log = get_log_summary(sys.argv[1])
-        # # buff_log = get_log_buffs(sys.argv[1])
-        # loop = asyncio.get_event_loop()
+        players = get_players(gear_log)
 
-        # players = get_players(gear_log)
-
-        # issues = loop.run_until_complete(
-        #     update_gear_sheet(None, None, players, log.get("zone"))
-        # )
-        # for issue in issues:
-        #     print("###################################################")
-        #     print(f"{issue[0]}\n")
-        #     print(f"Minor:\n{issue[1]['minor']}")
-        #     print(f"Major:\n{issue[1]['major']}")
-        #     print(f"Extreme:\n{issue[1]['extreme']}")
+        issues = loop.run_until_complete(
+            update_gear_sheet(None, None, players, log.get("zone"))
+        )
+        for issue in issues:
+            print("###################################################")
+            print(f"{issue[0]}\n")
+            print(f"Minor:\n{issue[1]['minor']}")
+            print(f"Major:\n{issue[1]['major']}")
+            print(f"Extreme:\n{issue[1]['extreme']}")
