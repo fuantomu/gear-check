@@ -1,0 +1,49 @@
+[{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 42347,
+    "start": 0,
+    "end": -1,
+    "options": 8192
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 41570,
+    "start": 0,
+    "end": -1,
+    "options": 8192
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 49416,
+    "start": 0,
+    "end": -1,
+    "options": 8192
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 41806,
+    "start": 0,
+    "end": -1,
+    "options": 8192
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 92134,
+    "ability-name": "Ignition",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 88287,
+    "ability-name": "Massive Crash",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+}]

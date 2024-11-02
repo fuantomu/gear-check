@@ -2,112 +2,105 @@
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
-    "target-id": 52530,
+    "target-id": 43689,
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
-    "target-id": 54563,
+    "target-id": 43686,
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
-    "target-id": 53734,
+    "target-id": 43687,
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
-    "target-id": 53369,
-    "start": 0,
-    "end": -1
-},{
-    "hostility": "friendly",
-    "event-type": "damage-done",
-    "source-id": null,
-    "target-id": 53896,
+    "target-id": 43688,
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-taken",
-    "ability-id": 99606,
-    "ability-name": "Firestorm",
+    "ability-id": 92075,
+    "ability-name": "Gravity Core",
     "by": "ability",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-taken",
-    "ability-id": 99336,
-    "ability-name": "Lava Spew",
+    "ability-id": 82772,
+    "ability-name": "Frozen",
     "by": "ability",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-taken",
-    "ability-id": 99816,
-    "ability-name": "Fiery Tornado",
+    "ability-id": 88558,
+    "ability-name": "Flame Torrent",
     "by": "ability",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-taken",
-    "ability-id": 99427,
-    "ability-name": "Incendiary Cloud",
+    "ability-id": 92548,
+    "ability-name": "Glaciate",
     "by": "ability",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-taken",
-    "ability-id": 99208,
-    "ability-name": "Ritual of the Flame",
+    "ability-id": 92548,
+    "ability-name": "Glaciate",
     "by": "ability",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-taken",
-    "ability-id": 99558,
-    "ability-name": "Meteoric Impact",
+    "ability-id": 83565,
+    "ability-name": "Quake",
     "by": "ability",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "damage-taken",
-    "ability-id": 99274,
-    "ability-name": "Molten Meteor",
+    "ability-id": 83067,
+    "ability-name": "Thundershock",
     "by": "ability",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "interrupts",
-    "ability-id": 98868,
-    "ability-name": "Brushfire",
+    "ability-id": 82752,
+    "ability-name": "Hydro Lance",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "interrupts",
-    "ability-id": 101223,
-    "ability-name": "Fieroblast",
+    "ability-id": 83718,
+    "ability-name": "Harden Skin",
     "start": 0,
     "end": -1
 },{
     "hostility": "friendly",
     "event-type": "interrupts",
-    "ability-id": 99919,
-    "ability-name": "Ignition",
+    "ability-id": 83070,
+    "ability-name": "Lightning Blast",
     "start": 0,
     "end": -1
 }]

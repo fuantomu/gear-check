@@ -1,0 +1,54 @@
+[{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 45870,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 45871,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 45872,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 45812,
+    "start": 0,
+    "end": -1,
+    "options": 8192
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 85483,
+    "ability-name": "Wind Blast",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 86133,
+    "ability-name": "Tornado",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 86282,
+    "ability-name": "Toxic Spores",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+}]

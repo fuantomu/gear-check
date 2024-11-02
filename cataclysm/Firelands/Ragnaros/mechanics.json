@@ -1,0 +1,100 @@
+[{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 52409,
+    "start": 0,
+    "end": -1,
+    "phase": 1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 52409,
+    "start": 0,
+    "end": -1,
+    "phase": 3
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 52409,
+    "start": 0,
+    "end": -1,
+    "phase": 5
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 52409,
+    "start": 0,
+    "end": -1,
+    "phase": 6
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 53231,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 53189,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 53140,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 54203,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 53500,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 99224,
+    "ability-name": "Engulfing Flames",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 98870,
+    "ability-name": "Scorched Ground",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 98928,
+    "ability-name": "Lava Wave",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 99287,
+    "ability-name": "Meteor Impact",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+}]

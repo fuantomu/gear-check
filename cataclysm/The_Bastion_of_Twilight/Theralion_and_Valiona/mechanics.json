@@ -1,0 +1,33 @@
+[{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 86844,
+    "ability-name": "Devouring Flames",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 86825,
+    "ability-name": "Tornado",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 86305,
+    "ability-name": "Toxic Spores",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 86631,
+    "ability-name": "Engulfing Magic",
+    "by": "target",
+    "start": 0,
+    "end": -1
+}]

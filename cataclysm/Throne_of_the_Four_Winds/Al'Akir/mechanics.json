@@ -1,0 +1,31 @@
+[{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 46753,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 47175,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 87856,
+    "ability-name": "Squall Line",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 89588,
+    "ability-name": "Lightning Clouds",
+    "by": "ability",
+    "start": 0,
+    "end": -1
+}]

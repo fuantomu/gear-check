@@ -1,0 +1,7 @@
+[["","damage-taken,totalDamage","92075",">=","30000","Gravity Core","Player did not remove Gravity Core for more than 6 seconds"],
+["","damage-taken,totalDamage","82772",">","0","Frozen","Player did not remove Water Bomb in time"],
+["!Tank","damage-taken,totalDamage","88558",">","0","Flame Torrent","Player stood in front of Flame Torrent"],
+["!Tank","damage-taken,totalDamage","92548",">","50000","Glaciate","Player did not far enough from Glaciate"],
+["","damage-taken,totalDamage","83565",">","40000","Quake","Player did not get Levitate Debuff"],
+["","damage-taken,totalDamage","83067",">","40000","Thundershock","Player did not get Grounding Debuff"],
+["","damage-taken,totalDamage","92215",">","0","Flame Strike","Player did not move out of Flame Strike"]]

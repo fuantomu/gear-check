@@ -5,14 +5,13 @@ from helper.discord import send_discord_post, update_discord_post
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
-from helper.functions import enumerate_step
+from helper.functions import enumerate_step, get_formatted_time
 from helper.getter import get_boss_fights
 from sheet.general import find_sheet_id, get_sheet_ids
 
 _sheets = None
 main_sheet = "Overview"
 characters = list(ascii_uppercase)
-encounter_column = {}
 
 
 async def create_mechanics_sheet(log, report):
@@ -35,8 +34,9 @@ async def create_mechanics_sheet(log, report):
 
         boss_fights = get_boss_fights(log.get("fights"))
         encounters = []
-        for idx, fight in enumerate(boss_fights):
-            encounter_column[fight["name"]] = characters[idx + 1]
+        for fight in boss_fights:
+            await update_discord_post(f"Checking logs for {fight['name']}")
+
             encounters.append(
                 {"name": fight["name"], "mechanics": check_encounter(report, fight)}
             )
@@ -129,19 +129,18 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
         }
     )
 
-    for idx, encounter in enumerate(encounters):
-        request_body["data"].append(
-            {
-                "range": f"{main_sheet}!{characters[idx + 1]}1",
-                "majorDimension": "COLUMNS",
-                "values": [[f'{encounter["name"]}']],
-            }
-        )
-
-    for encounter in encounters:
+    for encounter_idx, encounter in enumerate(encounters):
         print(f"Processing encounter details for {encounter['name']}")
         await update_discord_post(
             f"Processing encounter details for {encounter['name']}"
+        )
+
+        request_body["data"].append(
+            {
+                "range": f"{main_sheet}!{characters[encounter_idx + 1]}1",
+                "majorDimension": "COLUMNS",
+                "values": [[f'{encounter["name"]}']],
+            }
         )
 
         if all(
@@ -179,7 +178,7 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                         "majorDimension": "ROWS",
                         "values": [
                             [
-                                f"{encounter['mechanics'][1][key]['enemyName']} ({encounter['mechanics'][1][key]['enemyGuid']})"
+                                f"{encounter['mechanics'][1][key]['enemyName']} ({encounter['mechanics'][1][key]['enemyGuid']}) {'- Phase ' if encounter['mechanics'][1][key].get('phase') is not None else ''} {encounter['mechanics'][1][key].get('phase') if encounter['mechanics'][1][key].get('phase') is not None else ''}"
                                 for key in enemy_columns
                             ]
                         ],
@@ -189,7 +188,7 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                         "majorDimension": "ROWS",
                         "values": [
                             [
-                                f"{divmod(int(encounter['mechanics'][1][key]['start']),60)[0]:02d}:{divmod(int(encounter['mechanics'][1][key]['start']),60)[1]:02d}-{divmod(int(encounter['mechanics'][1][key]['end']),60)[0]:02d}:{divmod(int(encounter['mechanics'][1][key]['end']),60)[1]:02d}"
+                                f"{get_formatted_time(int(encounter['mechanics'][1][key]['checkStart']))}-{get_formatted_time(int(encounter['mechanics'][1][key]['checkEnd']))}"
                                 for key in enemy_columns
                             ]
                         ],
@@ -240,16 +239,18 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
             ]
         )
 
-        request_body["data"].extend(
-            [
-                {
-                    "range": f"{main_sheet}!A{2+idx}",
-                    "majorDimension": "ROWS",
-                    "values": [[entry["playerName"]]],
-                }
-                for idx, entry in enumerate(encounter["mechanics"][0])
-            ]
-        )
+        player_row = {}
+        for idx, entry in enumerate(encounter["mechanics"][0]):
+            player_row[entry["playerName"]] = f"{2+idx}"
+            request_body["data"].extend(
+                [
+                    {
+                        "range": f"{main_sheet}!A{2+idx}",
+                        "majorDimension": "ROWS",
+                        "values": [[entry["playerName"]]],
+                    }
+                ]
+            )
 
         ability_columns = {}
         for idx, ability in enumerate(encounter["mechanics"][2]):
@@ -415,10 +416,12 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
             else:
                 combined_fails[fail] = damage_taken_fails[fail]
 
+        # print(combined_fails)
+        # print(f"{encounter['name']}, {encounter_idx}, {characters[encounter_idx+1]}")
         request_body["data"].extend(
             [
                 {
-                    "range": f"{main_sheet}!{entry}",
+                    "range": f"{main_sheet}!{characters[encounter_idx + 1]}{player_row[entry]}",
                     "values": [[combined_fails[entry]]],
                 }
                 for entry in combined_fails
@@ -530,11 +533,11 @@ def update_damage_done(service, spreadsheetId, encounter, enemies):
     for idx, entry in enumerate_step(encounter["mechanics"][0], step=2):
         # print(f'Checking damage-done of player {entry["playerName"]}')
         for _, enemy in enumerate(entry.get("damage-done", [])):
+            # print(enemy)
             ranking["damage-done"][enemy["enemyId"]][entry["playerName"]] = {
                 "totalDamage": enemy.get("totalDamage", 0),
                 "activeTime": enemy.get("activeTime", 0),
             }
-            seconds, _ = divmod(int(enemy.get("activeTime", 0)), 1000)
             request_body["data"].append(
                 {
                     "range": f"{encounter['name']}!{enemies[enemy['enemyId']]}{3+idx}",
@@ -542,13 +545,15 @@ def update_damage_done(service, spreadsheetId, encounter, enemies):
                     "values": [
                         [
                             enemy.get("totalDamage", 0),
-                            f"{divmod(seconds,60)[0]:02d}:{divmod(seconds,60)[1]:02d}",
+                            f"{get_formatted_time(enemy.get('activeTime', 0))}",
                         ]
                     ],
                 }
             )
             for condition in entry["failedConditions"]:
-                if condition.get("enemyGuid") == enemy["enemyGuid"]:
+                if condition.get("enemyGuid") == enemy["enemyGuid"] and condition.get(
+                    "phase"
+                ) == enemy.get("phase"):
                     request_properties_body.append(
                         {
                             "repeatCell": {
@@ -579,22 +584,10 @@ def update_damage_done(service, spreadsheetId, encounter, enemies):
                             }
                         }
                     )
-                    if (
-                        f'{encounter_column[encounter["name"]]}{2+current_idx}'
-                        not in fails
-                    ):
-                        fails[
-                            f'{encounter_column[encounter["name"]]}{2+current_idx}'
-                        ] = ""
-                    fails[
-                        f'{encounter_column[encounter["name"]]}{2+current_idx}'
-                    ] += f'{condition["description"]}\n'
-        # request_body["data"].append(
-        #     {
-        #         "range": f'{main_sheet}!{encounter_column[encounter["name"]]}{2+current_idx}',
-        #         "values": [fails],
-        #     }
-        # )
+                    if f'{entry["playerName"]}' not in fails:
+                        fails[f'{entry["playerName"]}'] = ""
+                    fails[f'{entry["playerName"]}'] += f'{condition["description"]}\n'
+
         current_idx += 1
         last_index = max(last_index, idx + 5)
 
@@ -677,7 +670,6 @@ def update_damage_taken(service, spreadsheetId, encounter, abilities):
                 "totalDamage": ability.get("totalDamage", 0),
                 "hitCount": ability.get("hitCount", 0),
             }
-            seconds, _ = divmod(int(ability.get("activeTime", 0)), 1000)
             request_body["data"].append(
                 {
                     "range": f"{encounter['name']}!{abilities[ability['abilityGuid']]}{3+idx}",
@@ -685,7 +677,7 @@ def update_damage_taken(service, spreadsheetId, encounter, abilities):
                     "values": [
                         [
                             ability.get("totalDamage", 0),
-                            f"{divmod(seconds,60)[0]:02d}:{divmod(seconds,60)[1]:02d}",
+                            f"{get_formatted_time(ability.get('activeTime', 0))}",
                         ]
                     ],
                 }
@@ -722,16 +714,9 @@ def update_damage_taken(service, spreadsheetId, encounter, abilities):
                             }
                         }
                     )
-                    if (
-                        f'{encounter_column[encounter["name"]]}{2+current_idx}'
-                        not in fails
-                    ):
-                        fails[
-                            f'{encounter_column[encounter["name"]]}{2+current_idx}'
-                        ] = ""
-                    fails[
-                        f'{encounter_column[encounter["name"]]}{2+current_idx}'
-                    ] += f'{condition["description"]}\n'
+                    if f'{entry["playerName"]}' not in fails:
+                        fails[f'{entry["playerName"]}'] = ""
+                    fails[f'{entry["playerName"]}'] += f'{condition["description"]}\n'
 
         current_idx += 1
         last_index = max(last_index, idx + 5)

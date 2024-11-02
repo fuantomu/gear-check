@@ -1,0 +1,24 @@
+[{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 52571,
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "damage-done",
+    "source-id": null,
+    "target-id": 52593,
+    "start": 0,
+    "end": -1,
+    "phase": 2
+},{
+    "hostility": "friendly",
+    "event-type": "damage-taken",
+    "ability-id": 98620,
+    "ability-name": "Searing Seed",
+    "by": "target",
+    "start": 0,
+    "end": -1
+}]
