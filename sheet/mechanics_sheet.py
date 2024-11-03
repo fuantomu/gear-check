@@ -56,7 +56,16 @@ async def create_mechanics_sheet(log, log_title, report):
                         },
                         "fields": "title",
                     }
-                }
+                },
+                {
+                    "updateSheetProperties": {
+                        "properties": {
+                            "sheetId": 0,
+                            "gridProperties": {"frozenRowCount": 1},
+                        },
+                        "fields": "gridProperties.frozenRowCount",
+                    }
+                },
             ]
         }
 
@@ -452,6 +461,18 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                     }
                 }
             }
+        )
+
+        format_request["requests"].append(
+            {
+                "updateSheetProperties": {
+                    "properties": {
+                        "sheetId": find_sheet_id(_sheets, encounter["name"]),
+                        "gridProperties": {"frozenRowCount": 2},
+                    },
+                    "fields": "gridProperties.frozenRowCount",
+                }
+            },
         )
 
     # Format and resize columns in main sheet
