@@ -2,30 +2,25 @@ import json
 from helper.log import get_log, get_log_events
 from helper.mapper import hostility, playerType
 
-# encounter_cache = {}
-
 
 def check_encounter(report, fight):
-    # print(fight)
     checks = get_encounter_check(fight["zoneName"], fight["name"])
 
     if len(checks) == 0:
         return [], {}, {}, {}
-    # print(checks)
     enemies = get_encounter_enemies(
         report, fight["start_time"], fight["end_time"], checks
     )
-    # print(enemies)
 
     abilities = get_encounter_abilities(report, fight["end_time"], checks)
-
     interrupts = get_encounter_interrupts(report, fight["end_time"], checks)
+    buffs = get_encounter_buffs(report, fight["end_time"], checks)
+    debuffs = get_encounter_debuffs(report, fight["end_time"], checks)
 
     tanks = get_encounter_tanks(report, fight["end_time"])
 
     activity = []
     for check in checks:
-        # print(check)
         args = {
             "start": fight["start_time"] + check["start"] * 1000,
             "end": (
@@ -53,10 +48,17 @@ def check_encounter(report, fight):
             events = get_log_events(report, **args)
             target["type"] = "Ability"
         elif args["event-type"] == "interrupts":
-            # print(abilities)
             args.pop("by")
             events = get_log_events(report, **args)["entries"][0]["entries"]
             target["type"] = "Interrupt"
+        elif args["event-type"] == "debuffs":
+            args.pop("by")
+            events = get_log_events(report, **args)
+            target["type"] = "Debuff"
+        elif args["event-type"] == "buffs":
+            args.pop("by")
+            events = get_log_events(report, **args)
+            target["type"] = "Buff"
         else:
             target["data"] = find_enemy_by_guid(
                 enemies, check["target-id"], check.get("phase")
@@ -66,21 +68,19 @@ def check_encounter(report, fight):
             args["start"] = target["data"]["start"]
             args["end"] = target["data"]["end"]
             args["targetid"] = target["data"]["enemyId"].split("-")[0]
-            # print(args)
+
             events = get_log_events(report, **args)
 
         update_event_data(events, check, target, activity)
 
     conditions = get_encounter_conditions(fight["zoneName"], fight["name"])
     for player in activity:
-        # print(player.keys())
-        # print(player)
         if player["playerName"] in tanks:
             player["role"] = "Tank"
         for condition in conditions:
             check_conditions(player, condition)
-        # print(player)
-    return activity, enemies, abilities, interrupts
+
+    return activity, enemies, abilities, interrupts, buffs, debuffs
 
 
 def get_encounter_check(zone, encounter):
@@ -120,7 +120,7 @@ def get_encounter_enemies(report, start, end, checks):
         for entry in checks
         if entry["event-type"] in ["damage-done", "damage-taken"]
     ]
-    # print(check_enemies)
+
     fights = get_log(report)["fights"]
 
     for enemy in events.get("entries"):
@@ -176,7 +176,7 @@ def get_encounter_enemies(report, start, end, checks):
                         ),
                         "abilities": [],
                     }
-    # print(f"enemies: {entities}")
+
     return entities
 
 
@@ -191,10 +191,9 @@ def get_encounter_abilities(report, end, checks):
     }
     events = get_log_events(report, **args)
     check_abilites = [entry.get("ability-id") for entry in checks if "by" in entry]
-    # print(events)
 
     for ability in events.get("entries"):
-        # print(ability)
+
         if ability["guid"] not in check_abilites:
             continue
 
@@ -202,7 +201,7 @@ def get_encounter_abilities(report, end, checks):
             "abilityName": ability["name"],
             "abilityGuid": ability["guid"],
         }
-    # print(f"abilities: {entities}")
+
     return entities
 
 
@@ -215,23 +214,21 @@ def get_encounter_interrupts(report, end, checks):
         "hostility": 0,
     }
     events = get_log_events(report, **args)["entries"][0]
-    # print(events)
+
     check_interrupts = [entry.get("ability-id") for entry in checks]
-    # print(events)
 
     for interrupt in events.get("entries"):
-        # print(ability)
+
         if interrupt["guid"] not in check_interrupts:
             continue
 
-        # print(interrupt)
         entities[interrupt["guid"]] = {
             "interruptName": interrupt["name"],
             "interruptGuid": interrupt["guid"],
             "spellsCompleted": interrupt["spellsCompleted"],
             "spellsInterrupted": interrupt["spellsInterrupted"],
         }
-    # print(f"interrupts: {entities}")
+
     return entities
 
 
@@ -245,9 +242,66 @@ def get_encounter_tanks(report, end):
     return [sorted_list[0]["name"], sorted_list[1]["name"]]
 
 
+def get_encounter_buffs(report, end, checks):
+    entities = {}
+    args = {
+        "start": 0,
+        "end": end,
+        "event-type": "buffs",
+        "hostility": 0,
+    }
+    events = get_log_events(report, **args)
+
+    check_buffs = [
+        entry.get("ability-id") for entry in checks if entry["event-type"] == "buffs"
+    ]
+
+    for buff in events.get("auras"):
+
+        if buff["guid"] not in check_buffs:
+            continue
+
+        entities[buff["guid"]] = {
+            "buffName": buff["name"],
+            "buffGuid": buff["guid"],
+            "totalUptime": buff["totalUptime"],
+            "totalUses": buff["totalUses"],
+        }
+
+    return entities
+
+
+def get_encounter_debuffs(report, end, checks):
+    entities = {}
+    args = {
+        "start": 0,
+        "end": end,
+        "event-type": "debuffs",
+        "hostility": 0,
+    }
+    events = get_log_events(report, **args)
+
+    check_debuffs = [
+        entry.get("ability-id") for entry in checks if entry["event-type"] == "debuffs"
+    ]
+
+    for debuff in events.get("auras"):
+
+        if debuff["guid"] not in check_debuffs:
+            continue
+
+        entities[debuff["guid"]] = {
+            "debuffName": debuff["name"],
+            "debuffGuid": debuff["guid"],
+            "totalUptime": debuff["totalUptime"],
+            "totalUses": debuff["totalUses"],
+        }
+
+    return entities
+
+
 def find_enemy_by_guid(enemies, guid, phase=None) -> dict:
     for enemy in enemies.values():
-        # print(f"{enemy}, {phase}")
         if enemy.get("enemyGuid") == guid and enemy.get("phase") == phase:
             return enemy
     return {}
@@ -257,6 +311,8 @@ def update_event_data(events, check, target, data):
 
     if target["type"] == "Interrupt":
         entries = events[0].get("details", [])
+    elif target["type"] in ["Debuff", "Buff"]:
+        entries = events.get("auras", [])
     else:
         entries = events.get("entries", [])
     for playerEntry in entries:
@@ -308,6 +364,24 @@ def update_event_data(events, check, target, data):
                     "interruptName": check.get("ability-name", None),
                     "interruptGuid": check.get("ability-id", None),
                     "total": playerEntry.get("total"),
+                }
+            )
+        elif target["type"] == "Buff":
+            player[check["event-type"]].append(
+                {
+                    "buffName": check.get("ability-name", None),
+                    "buffGuid": check.get("ability-id", None),
+                    "totalUses": playerEntry.get("totalUses"),
+                    "totalUptime": playerEntry.get("totalUptime"),
+                }
+            )
+        elif target["type"] == "Debuff":
+            player[check["event-type"]].append(
+                {
+                    "debuffName": check.get("ability-name", None),
+                    "debuffGuid": check.get("ability-id", None),
+                    "totalUses": playerEntry.get("totalUses"),
+                    "totalUptime": playerEntry.get("totalUptime"),
                 }
             )
 

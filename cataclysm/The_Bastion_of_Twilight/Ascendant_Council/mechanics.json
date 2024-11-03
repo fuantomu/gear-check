@@ -103,4 +103,18 @@
     "ability-name": "Lightning Blast",
     "start": 0,
     "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "buffs",
+    "ability-id": 82663,
+    "ability-name": "Flame Imbued",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "debuffs",
+    "ability-id": 92076,
+    "ability-name": "Gravity Core",
+    "start": 0,
+    "end": -1
 }]

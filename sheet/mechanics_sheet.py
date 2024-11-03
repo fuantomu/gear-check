@@ -144,6 +144,7 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
 
     for encounter_idx, encounter in enumerate(encounters):
         print(f"Processing encounter details for {encounter['name']}")
+
         await update_discord_post(
             f"Processing encounter details for {encounter['name']}"
         )
@@ -168,7 +169,6 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 idx + 1
             ]
             last_column = idx + 1
-        # print(f"{enemy_columns}, {last_column}")
 
         damage_done_fails = {}
         damage_done_bonus = 0
@@ -239,8 +239,6 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 service, spreadsheetId, encounter, enemy_columns
             )
 
-        # print(encounter["mechanics"][0])
-
         request_body["data"].extend(
             [
                 {
@@ -271,7 +269,6 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 characters[idx + 1 + len(enemy_columns) + damage_done_bonus]
             )
             last_column = idx + 1 + len(enemy_columns) + damage_done_bonus
-        # print(f"{ability_columns}, {last_column}")
 
         damage_taken_bonus = 0
         damage_taken_fails = {}
@@ -329,8 +326,10 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 service, spreadsheetId, encounter, ability_columns
             )
 
+        interrupt_bonus = 0
         interrupt_columns = {}
         for idx, interrupt in enumerate(encounter["mechanics"][3]):
+            interrupt_bonus = 1
             interrupt_columns[encounter["mechanics"][3][interrupt]["interruptGuid"]] = (
                 characters[
                     idx
@@ -349,8 +348,6 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 + len(ability_columns)
                 + damage_taken_bonus
             )
-
-        # print(f"{interrupt_columns}, {last_column}")
 
         if len(encounter["mechanics"][3]) > 0:
             request_body["data"].extend(
@@ -419,6 +416,162 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
             )
             update_interrupts(service, spreadsheetId, encounter, interrupt_columns)
 
+        buff_bonus = 0
+        buff_columns = {}
+        for idx, buff in enumerate(encounter["mechanics"][4]):
+            buff_bonus = 1
+            buff_columns[encounter["mechanics"][4][buff]["buffGuid"]] = characters[
+                idx
+                + 1
+                + len(enemy_columns)
+                + damage_done_bonus
+                + len(ability_columns)
+                + damage_taken_bonus
+                + len(interrupt_columns)
+                + interrupt_bonus
+            ]
+            last_column = (
+                idx
+                + 1
+                + len(enemy_columns)
+                + damage_done_bonus
+                + len(ability_columns)
+                + damage_taken_bonus
+                + len(interrupt_columns)
+                + interrupt_bonus
+            )
+
+        buff_fails = {}
+        if len(encounter["mechanics"][4]) > 0:
+            request_body["data"].extend(
+                [
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(buff_columns)]}1",
+                        "majorDimension": "ROWS",
+                        "values": [[f"Buffs"]],
+                    },
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(buff_columns)+1]}1",
+                        "majorDimension": "ROWS",
+                        "values": [
+                            [
+                                f"{encounter['mechanics'][4][key]['buffName']} ({encounter['mechanics'][4][key]['buffGuid']})"
+                                for key in buff_columns
+                            ]
+                        ],
+                    },
+                ]
+            )
+            format_request["requests"].extend(
+                [
+                    {
+                        "repeatCell": {
+                            "range": {
+                                "sheetId": find_sheet_id(_sheets, encounter["name"]),
+                                "startRowIndex": 0,
+                                "endRowIndex": 2,
+                                "startColumnIndex": last_column - len(buff_columns),
+                                "endColumnIndex": last_column - len(buff_columns) + 1,
+                            },
+                            "cell": {
+                                "userEnteredFormat": {
+                                    "backgroundColor": {
+                                        "red": 75 / 255,
+                                        "green": 133 / 255,
+                                        "blue": 255 / 255,
+                                    },
+                                    "horizontalAlignment": "CENTER",
+                                    "textFormat": {"fontSize": 14, "bold": True},
+                                }
+                            },
+                            "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+                        }
+                    }
+                ]
+            )
+            buff_fails = update_buffs(service, spreadsheetId, encounter, buff_columns)
+
+        debuff_columns = {}
+        for idx, debuff in enumerate(encounter["mechanics"][5]):
+            debuff_columns[encounter["mechanics"][5][debuff]["debuffGuid"]] = (
+                characters[
+                    idx
+                    + 1
+                    + len(enemy_columns)
+                    + damage_done_bonus
+                    + len(ability_columns)
+                    + damage_taken_bonus
+                    + len(interrupt_columns)
+                    + interrupt_bonus
+                    + len(buff_columns)
+                    + buff_bonus
+                ]
+            )
+            last_column = (
+                idx
+                + 1
+                + len(enemy_columns)
+                + damage_done_bonus
+                + len(ability_columns)
+                + damage_taken_bonus
+                + len(interrupt_columns)
+                + interrupt_bonus
+                + len(buff_columns)
+                + buff_bonus
+            )
+
+        debuff_fails = {}
+        if len(encounter["mechanics"][5]) > 0:
+            request_body["data"].extend(
+                [
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(debuff_columns)]}1",
+                        "majorDimension": "ROWS",
+                        "values": [[f"Debuffs"]],
+                    },
+                    {
+                        "range": f"{encounter['name']}!{characters[last_column-len(debuff_columns)+1]}1",
+                        "majorDimension": "ROWS",
+                        "values": [
+                            [
+                                f"{encounter['mechanics'][5][key]['debuffName']} ({encounter['mechanics'][5][key]['debuffGuid']})"
+                                for key in debuff_columns
+                            ]
+                        ],
+                    },
+                ]
+            )
+            format_request["requests"].extend(
+                [
+                    {
+                        "repeatCell": {
+                            "range": {
+                                "sheetId": find_sheet_id(_sheets, encounter["name"]),
+                                "startRowIndex": 0,
+                                "endRowIndex": 2,
+                                "startColumnIndex": last_column - len(debuff_columns),
+                                "endColumnIndex": last_column - len(debuff_columns) + 1,
+                            },
+                            "cell": {
+                                "userEnteredFormat": {
+                                    "backgroundColor": {
+                                        "red": 75 / 255,
+                                        "green": 133 / 255,
+                                        "blue": 255 / 255,
+                                    },
+                                    "horizontalAlignment": "CENTER",
+                                    "textFormat": {"fontSize": 14, "bold": True},
+                                }
+                            },
+                            "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+                        }
+                    }
+                ]
+            )
+            debuff_fails = update_debuffs(
+                service, spreadsheetId, encounter, debuff_columns
+            )
+
         combined_fails = {}
 
         for fail in damage_done_fails:
@@ -428,9 +581,17 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 combined_fails[fail] += damage_taken_fails[fail]
             else:
                 combined_fails[fail] = damage_taken_fails[fail]
+        for fail in buff_fails:
+            if fail in combined_fails:
+                combined_fails[fail] += buff_fails[fail]
+            else:
+                combined_fails[fail] = buff_fails[fail]
+        for fail in debuff_fails:
+            if fail in combined_fails:
+                combined_fails[fail] += debuff_fails[fail]
+            else:
+                combined_fails[fail] = debuff_fails[fail]
 
-        # print(combined_fails)
-        # print(f"{encounter['name']}, {encounter_idx}, {characters[encounter_idx+1]}")
         request_body["data"].extend(
             [
                 {
@@ -440,7 +601,6 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
                 for entry in combined_fails
             ]
         )
-        # print(request_body)
         try:
             if len(request_body["data"]) > 0:
                 service.spreadsheets().values().batchUpdate(
@@ -531,7 +691,6 @@ async def update_mechanics_sheet(service, spreadsheetId, encounters):
             },
         ]
     )
-    # print(format_request)
     try:
         service.spreadsheets().batchUpdate(
             spreadsheetId=spreadsheetId, body=format_request
@@ -556,9 +715,7 @@ def update_damage_done(service, spreadsheetId, encounter, enemies):
     current_idx = 0
     fails = {}
     for idx, entry in enumerate_step(encounter["mechanics"][0], step=2):
-        # print(f'Checking damage-done of player {entry["playerName"]}')
         for _, enemy in enumerate(entry.get("damage-done", [])):
-            # print(enemy)
             ranking["damage-done"][enemy["enemyId"]][entry["playerName"]] = {
                 "totalDamage": enemy.get("totalDamage", 0),
                 "activeTime": enemy.get("activeTime", 0),
@@ -689,7 +846,6 @@ def update_damage_taken(service, spreadsheetId, encounter, abilities):
     current_idx = 0
     fails = {}
     for idx, entry in enumerate_step(encounter["mechanics"][0], step=2):
-        # print(f'Checking damage-taken of player {entry["playerName"]}')
         for _, ability in enumerate(entry.get("damage-taken", [])):
             ranking["damage-taken"][ability["abilityGuid"]][entry["playerName"]] = {
                 "totalDamage": ability.get("totalDamage", 0),
@@ -870,7 +1026,6 @@ def update_interrupts(service, spreadsheetId, encounter, interrupts):
             }
         )
 
-    # print(request_body)
     try:
         if len(request_body["data"]) > 0:
             service.spreadsheets().values().batchUpdate(
@@ -878,3 +1033,263 @@ def update_interrupts(service, spreadsheetId, encounter, interrupts):
             ).execute()
     except Exception as e:
         print(e)
+
+
+def update_buffs(service, spreadsheetId, encounter, buffs):
+    request_body = {
+        "valueInputOption": "USER_ENTERED",
+        "data": [],
+    }
+    request_properties_body = []
+    last_index = 0
+    ranking = {"buffs": {}}
+
+    for buff in buffs:
+        ranking["buffs"][buff] = {}
+
+    current_idx = 0
+    fails = {}
+    for idx, entry in enumerate_step(encounter["mechanics"][0], step=2):
+        for _, buff in enumerate(entry.get("buffs", [])):
+            ranking["buffs"][buff["buffGuid"]][entry["playerName"]] = {
+                "totalUptime": buff.get("totalUptime", 0),
+                "totalUses": buff.get("totalUses", 0),
+            }
+            request_body["data"].append(
+                {
+                    "range": f"{encounter['name']}!{buffs[buff['buffGuid']]}{3+idx}",
+                    "majorDimension": "COLUMNS",
+                    "values": [
+                        [
+                            buff.get("totalUses", 0),
+                            f"{get_formatted_time(buff.get('totalUptime', 0))}",
+                        ]
+                    ],
+                }
+            )
+            for condition in entry["failedConditions"]:
+                if condition.get("buffGuid") == buff["buffGuid"]:
+                    request_properties_body.append(
+                        {
+                            "repeatCell": {
+                                "cell": {
+                                    "userEnteredFormat": {
+                                        "backgroundColor": {
+                                            "red": 0.918,
+                                            "green": 0.3412,
+                                            "blue": 0.3412,
+                                        }
+                                    }
+                                },
+                                "fields": "userEnteredFormat.backgroundColor",
+                                "range": {
+                                    "sheetId": find_sheet_id(
+                                        _sheets, encounter["name"]
+                                    ),
+                                    "startRowIndex": 2 + idx,
+                                    "endRowIndex": 2 + idx + 1,
+                                    "startColumnIndex": characters.index(
+                                        buffs[buff["buffGuid"]]
+                                    ),
+                                    "endColumnIndex": characters.index(
+                                        buffs[buff["buffGuid"]]
+                                    )
+                                    + 1,
+                                },
+                            }
+                        }
+                    )
+                    if f'{entry["playerName"]}' not in fails:
+                        fails[f'{entry["playerName"]}'] = ""
+                    fails[f'{entry["playerName"]}'] += f'{condition["description"]}\n'
+
+        current_idx += 1
+        last_index = max(last_index, idx + 5)
+
+    request_body["data"].append(
+        {
+            "range": f"{encounter['name']}!A{last_index+1}",
+            "majorDimension": "ROWS",
+            "values": [
+                ["Total"],
+                ["Top 10"],
+            ],
+        }
+    )
+
+    for _, buff in enumerate(encounter["mechanics"][4]):
+        request_body["data"].append(
+            {
+                "range": f"{encounter['name']}!{buffs[encounter['mechanics'][4][buff]['buffGuid']]}{last_index+1}",
+                "majorDimension": "ROWS",
+                "values": [
+                    [
+                        f"=sum(filter({buffs[encounter['mechanics'][4][buff]['buffGuid']]}3:{buffs[encounter['mechanics'][4][buff]['buffGuid']]}{last_index}, isodd(row({buffs[encounter['mechanics'][4][buff]['buffGuid']]}3:{buffs[encounter['mechanics'][4][buff]['buffGuid']]}{last_index}))))",
+                    ]
+                ],
+            }
+        )
+
+    for rank in ranking["buffs"]:
+        ranks = sorted(
+            ranking["buffs"][rank].items(),
+            key=lambda item: item[1]["totalUptime"],
+            reverse=True,
+        )[:10]
+        request_body["data"].append(
+            {
+                "range": f"{encounter['name']}!{buffs[encounter['mechanics'][4][rank]['buffGuid']]}{last_index+2}",
+                "majorDimension": "ROWS",
+                "values": [
+                    [f"{player[0]}: {player[1]['totalUptime']}"] for player in ranks
+                ],
+            }
+        )
+
+    try:
+        if len(request_body["data"]) > 0:
+            service.spreadsheets().values().batchUpdate(
+                spreadsheetId=spreadsheetId, body=request_body
+            ).execute()
+    except Exception as e:
+        print(e)
+
+    try:
+        if len(request_properties_body) > 0:
+            service.spreadsheets().batchUpdate(
+                spreadsheetId=spreadsheetId, body={"requests": request_properties_body}
+            ).execute()
+    except Exception as e:
+        print(e)
+
+    return fails
+
+
+def update_debuffs(service, spreadsheetId, encounter, debuffs):
+    request_body = {
+        "valueInputOption": "USER_ENTERED",
+        "data": [],
+    }
+    request_properties_body = []
+    last_index = 0
+    ranking = {"debuffs": {}}
+    for debuff in debuffs:
+        ranking["debuffs"][debuff] = {}
+
+    current_idx = 0
+    fails = {}
+    for idx, entry in enumerate_step(encounter["mechanics"][0], step=2):
+        for _, debuff in enumerate(entry.get("debuffs", [])):
+            ranking["debuffs"][debuff["debuffGuid"]][entry["playerName"]] = {
+                "totalUptime": debuff.get("totalUptime", 0),
+                "totalUses": debuff.get("totalUses", 0),
+            }
+            request_body["data"].append(
+                {
+                    "range": f"{encounter['name']}!{debuffs[debuff['debuffGuid']]}{3+idx}",
+                    "majorDimension": "COLUMNS",
+                    "values": [
+                        [
+                            debuff.get("totalUses", 0),
+                            f"{get_formatted_time(debuff.get('totalUptime', 0))}",
+                        ]
+                    ],
+                }
+            )
+            for condition in entry["failedConditions"]:
+                if condition.get("debuffGuid") == debuff["debuffGuid"]:
+                    request_properties_body.append(
+                        {
+                            "repeatCell": {
+                                "cell": {
+                                    "userEnteredFormat": {
+                                        "backgroundColor": {
+                                            "red": 0.918,
+                                            "green": 0.3412,
+                                            "blue": 0.3412,
+                                        }
+                                    }
+                                },
+                                "fields": "userEnteredFormat.backgroundColor",
+                                "range": {
+                                    "sheetId": find_sheet_id(
+                                        _sheets, encounter["name"]
+                                    ),
+                                    "startRowIndex": 2 + idx,
+                                    "endRowIndex": 2 + idx + 1,
+                                    "startColumnIndex": characters.index(
+                                        debuff[debuff["debuffGuid"]]
+                                    ),
+                                    "endColumnIndex": characters.index(
+                                        debuff[debuff["debuffGuid"]]
+                                    )
+                                    + 1,
+                                },
+                            }
+                        }
+                    )
+                    if f'{entry["playerName"]}' not in fails:
+                        fails[f'{entry["playerName"]}'] = ""
+                    fails[f'{entry["playerName"]}'] += f'{condition["description"]}\n'
+
+        current_idx += 1
+        last_index = max(last_index, idx + 5)
+
+    request_body["data"].append(
+        {
+            "range": f"{encounter['name']}!A{last_index+1}",
+            "majorDimension": "ROWS",
+            "values": [
+                ["Total"],
+                ["Top 10"],
+            ],
+        }
+    )
+
+    for _, debuff in enumerate(encounter["mechanics"][5]):
+        request_body["data"].append(
+            {
+                "range": f"{encounter['name']}!{debuffs[encounter['mechanics'][5][debuff]['debuffGuid']]}{last_index+1}",
+                "majorDimension": "ROWS",
+                "values": [
+                    [
+                        f"=sum(filter({debuffs[encounter['mechanics'][5][debuff]['debuffGuid']]}3:{debuffs[encounter['mechanics'][5][debuff]['debuffGuid']]}{last_index}, isodd(row({debuffs[encounter['mechanics'][5][debuff]['debuffGuid']]}3:{debuffs[encounter['mechanics'][5][debuff]['debuffGuid']]}{last_index}))))",
+                    ]
+                ],
+            }
+        )
+
+    for rank in ranking["debuffs"]:
+        ranks = sorted(
+            ranking["debuffs"][rank].items(),
+            key=lambda item: item[1]["totalUptime"],
+            reverse=True,
+        )[:10]
+        request_body["data"].append(
+            {
+                "range": f"{encounter['name']}!{debuffs[encounter['mechanics'][5][rank]['debuffGuid']]}{last_index+2}",
+                "majorDimension": "ROWS",
+                "values": [
+                    [f"{player[0]}: {get_formatted_time(player[1]['totalUptime'])}"]
+                    for player in ranks
+                ],
+            }
+        )
+
+    try:
+        if len(request_body["data"]) > 0:
+            service.spreadsheets().values().batchUpdate(
+                spreadsheetId=spreadsheetId, body=request_body
+            ).execute()
+    except Exception as e:
+        print(e)
+
+    try:
+        if len(request_properties_body) > 0:
+            service.spreadsheets().batchUpdate(
+                spreadsheetId=spreadsheetId, body={"requests": request_properties_body}
+            ).execute()
+    except Exception as e:
+        print(e)
+
+    return fails
