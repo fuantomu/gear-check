@@ -6,7 +6,6 @@ from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
 from helper.functions import enumerate_step, get_formatted_time
-from helper.getter import get_boss_fights
 from sheet.general import find_sheet_id, get_sheet_ids
 
 _sheets = None
@@ -14,13 +13,13 @@ main_sheet = "Overview"
 characters = list(ascii_uppercase)
 
 
-async def create_mechanics_sheet(log, report):
+async def create_mechanics_sheet(log, log_title, report):
     creds = get_creds()
 
     try:
         await update_discord_post(f"Creating Google Sheet")
         service = build("sheets", "v4", credentials=creds)
-        title = f"{log.get('title')} Mechanics Sheet"
+        title = f"{log_title} Mechanics Sheet"
         spreadsheet = {"properties": {"title": title}}
         spreadsheet = (
             service.spreadsheets()
@@ -32,13 +31,18 @@ async def create_mechanics_sheet(log, report):
             f"https://docs.google.com/spreadsheets/d/{spreadsheet.get('spreadsheetId')}/edit#gid=0"
         )
 
-        boss_fights = get_boss_fights(log.get("fights"))
+        # boss_fights = get_boss_fights(log.get("fights"))
         encounters = []
-        for fight in boss_fights:
-            await update_discord_post(f"Checking logs for {fight['name']}")
+        for fight in log:
+            await update_discord_post(
+                f"Checking logs for {fight['name']} {'kill' if fight['kill'] else 'wipe'} ({get_formatted_time(fight['start_time'])}-{get_formatted_time(fight['end_time'])})"
+            )
 
             encounters.append(
-                {"name": fight["name"], "mechanics": check_encounter(report, fight)}
+                {
+                    "name": f"{fight['name']} {'kill' if fight['kill'] else 'wipe'} ({get_formatted_time(fight['start_time'])}-{get_formatted_time(fight['end_time'])})",
+                    "mechanics": check_encounter(report, fight),
+                }
             )
 
         # Rename first sheet to first encounter name

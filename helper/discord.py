@@ -22,3 +22,44 @@ async def send_discord_post(msg):
     global context
     if context is not None:
         await context.send(f"{msg}")
+
+
+def check_message(author, max):
+    def inner_check(msg):
+        if msg.author != author:
+            return False
+        checks = msg.content.split(",")
+        for check in checks:
+            mod: list = check.split("-")
+            # print(mod)
+            if len(mod) == 1:
+                if mod[0] in ["A", "B", "C", "D"]:
+                    continue
+                elif "." not in mod[0]:
+                    return False
+            # msg contains a modifier like A- or B-
+            if len(mod) > 1:
+                if mod[0] not in ["A", "B", "C", "D"]:
+                    return False
+                mod[0] = mod[1]
+                mod.pop()
+            # print(mod)
+            try:
+                if "." in mod[0]:
+                    temp1, temp2 = mod[0].split(".")
+                    mod[0] = temp1
+                    mod.append(int(temp2))
+                mod[0] = int(mod[0])
+                # print(mod)
+            except Exception as e:
+                print(e)
+                return False
+
+            if mod[0] > max or mod[0] < 1:
+                return False
+            if len(mod) > 1:
+                if mod[1] > max or mod[1] < 1:
+                    return False
+        return True
+
+    return inner_check

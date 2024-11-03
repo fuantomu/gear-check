@@ -40,6 +40,70 @@ def get_unique_players(players):
 def get_boss_fights(fights):
     boss_fights = []
     for fight in fights:
-        if fight["boss"] != 0 and fight["kill"]:
+        if fight.get("boss", 0) != 0:
             boss_fights.append(fight)
     return boss_fights
+
+
+def filter_fights(fights, filter, fight_order):
+    unique_checks = filter.split(",")
+
+    filtered_fights = []
+    for check in unique_checks:
+        mode = check.split("-")
+        # check has a mode (A-,B-,C-,D-)
+        if len(mode) > 1:
+            if mode[0] in ["A", "B"]:
+                filtered_fights.extend(
+                    [
+                        fight
+                        for fight in fights
+                        if fight["name"] == fight_order[int(mode[1]) - 1]
+                    ]
+                )
+                continue
+            if mode[0] == "C":
+                filtered_fights.extend(
+                    [
+                        fight
+                        for fight in fights
+                        if fight["kill"]
+                        and fight["name"] == fight_order[int(mode[1]) - 1]
+                    ]
+                )
+                continue
+            if mode[0] == "D":
+                filtered_fights.extend(
+                    [
+                        fight
+                        for fight in fights
+                        if not fight["kill"]
+                        and fight["name"] == fight_order[int(mode[1]) - 1]
+                    ]
+                )
+                continue
+        else:
+            if check in ["A", "B"]:
+                filtered_fights.extend(fights)
+                continue
+            if check == "C":
+                filtered_fights.extend([fight for fight in fights if fight["kill"]])
+                continue
+            if check == "D":
+                filtered_fights.extend([fight for fight in fights if not fight["kill"]])
+                continue
+            submode = check.split(".")
+            # check has a specific fight (1.1, 2.1, ...)
+            if len(submode) > 1:
+                try:
+                    temp = [
+                        fight
+                        for fight in fights
+                        if fight["name"] == fight_order[int(submode[0]) - 1]
+                    ]
+                    filtered_fights.append(temp[int(submode[1]) - 1])
+                except:
+                    pass
+                continue
+
+    return filtered_fights

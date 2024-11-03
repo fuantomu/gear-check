@@ -2,9 +2,10 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
+from helper.functions import get_formatted_time
 from helper.log import get_log, get_log_summary
-from helper.getter import get_players
-from helper.discord import set_context, set_current_message
+from helper.getter import filter_fights, get_boss_fights, get_players
+from helper.discord import check_message, set_context, set_current_message
 import sys
 import asyncio
 from sheet.cut_sheet import create_sheet
@@ -13,7 +14,9 @@ from sheet.mechanics_sheet import create_mechanics_sheet
 
 load_dotenv(override=True)
 
-bot = commands.Bot()
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(intents=intents)
 
 
 @bot.slash_command(
@@ -73,13 +76,51 @@ async def gearcheck(ctx, arg, role=None):
 async def mechanicscheck(ctx, arg, role=None):
     set_context(ctx)
     await ctx.defer()
-    set_current_message(await ctx.followup.send("Working..."))
+
     log = get_log(arg)
 
     if log.get("error") is not None:
         await ctx.followup.send(log["error"])
     else:
-        await create_mechanics_sheet(log, arg)
+        boss_fights = get_boss_fights(log.get("fights"))
+
+        encounters = {}
+        for fight in boss_fights:
+            if fight["name"] not in encounters:
+                encounters[fight["name"]] = {"id": len(encounters) + 1, "fights": []}
+            encounters[fight["name"]]["fights"].append(
+                f"  {len(encounters)}.{len(encounters[fight['name']]['fights'])+1} {get_formatted_time(fight['end_time']-fight['start_time'])}, {'kill' if fight['kill'] else 'wipe'}"
+            )
+
+        available_fights = []
+        available_fights.append(
+            f"```A: all     B: all kills&wipes     C: all kills     D: all wipes\n"
+        )
+        fight_order = []
+        for fight in encounters:
+            available_fights.append(f"{encounters[fight]['id']}. {fight}")
+            fight_order.append(fight)
+            for pull in encounters[fight]["fights"]:
+                available_fights.append(pull)
+
+        fights = "\n".join(available_fights)
+        await ctx.followup.send(f"{fights}```")
+
+        await ctx.send(
+            f'Which fight(s) to do you want to check?\n Examples:\n * "A" would give you all kills&wipes from all Encounters\n * "B-1" would give you all kills&wipes from Encounter 1\n * "B-1,C-2,3.2" gives you checks for all kills&wipes on Encounter 1, kills for Encounter 2 and checks on Encounter 3.2\n * "1.1,6.2,7.1" gives you checks for Encounters 1.1, 6.2 and 7.1)'
+        )
+
+        response = await bot.wait_for(
+            "message",
+            check=check_message(ctx.author, len(encounters)),
+            timeout=1800,
+        )
+
+        set_current_message(await ctx.send(f"Working..."))
+
+        filtered_fights = filter_fights(boss_fights, response.content, fight_order)
+
+        await create_mechanics_sheet(filtered_fights, log.get("title"), arg)
 
         if role is not None:
             await ctx.send(f"<@&{role}>")
