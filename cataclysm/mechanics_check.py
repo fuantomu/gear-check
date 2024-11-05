@@ -64,6 +64,11 @@ def check_encounter(report, fight):
             target["data"] = find_enemy_by_guid(
                 enemies, check["target-id"], check.get("phase")
             )
+
+            if len(target["data"]) == 0:
+                print(f"WARN: No enemy found for id {check['target-id']}")
+                continue
+
             target["type"] = "Enemy"
 
             args["start"] = target["data"]["start"]
