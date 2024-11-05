@@ -1218,10 +1218,10 @@ def update_debuffs(service, spreadsheetId, encounter, debuffs):
                                     "startRowIndex": 2 + idx,
                                     "endRowIndex": 2 + idx + 1,
                                     "startColumnIndex": characters.index(
-                                        debuff[debuff["debuffGuid"]]
+                                        debuffs[debuff["debuffGuid"]]
                                     ),
                                     "endColumnIndex": characters.index(
-                                        debuff[debuff["debuffGuid"]]
+                                        debuffs[debuff["debuffGuid"]]
                                     )
                                     + 1,
                                 },

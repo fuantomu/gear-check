@@ -1,6 +1,6 @@
 import json
 from helper.log import get_log, get_log_events
-from helper.mapper import hostility, playerType
+from helper.mapper import hostility, playerType, tank_icons, healer_icons
 
 
 def check_encounter(report, fight):
@@ -18,6 +18,7 @@ def check_encounter(report, fight):
     debuffs = get_encounter_debuffs(report, fight["end_time"], checks)
 
     tanks = get_encounter_tanks(report, fight["end_time"])
+    healers = get_encounter_healer(report, fight["end_time"])
 
     activity = []
     for check in checks:
@@ -77,6 +78,8 @@ def check_encounter(report, fight):
     for player in activity:
         if player["playerName"] in tanks:
             player["role"] = "Tank"
+        if player["playerName"] in healers:
+            player["role"] = "Healer"
         for condition in conditions:
             check_conditions(player, condition)
 
@@ -236,10 +239,24 @@ def get_encounter_tanks(report, end):
     args = {"start": 0, "end": end, "event-type": "damage-taken", "hostility": 0}
     events = get_log_events(report, **args)
     sorted_list = sorted(
-        events.get("entries", []), key=lambda e: e["total"], reverse=True
+        [event for event in events.get("entries", []) if event["icon"] in tank_icons],
+        key=lambda e: e["total"],
+        reverse=True,
     )
 
-    return [sorted_list[0]["name"], sorted_list[1]["name"]]
+    return [player["name"] for player in sorted_list[: min(len(sorted_list), 2)]]
+
+
+def get_encounter_healer(report, end):
+    args = {"start": 0, "end": end, "event-type": "healing", "hostility": 0}
+    events = get_log_events(report, **args)
+    sorted_list = sorted(
+        [event for event in events.get("entries", []) if event["icon"] in healer_icons],
+        key=lambda e: e["total"],
+        reverse=True,
+    )
+
+    return [player["name"] for player in sorted_list[: min(len(sorted_list), 6)]]
 
 
 def get_encounter_buffs(report, end, checks):
@@ -408,6 +425,9 @@ def check_conditions(player, condition):
 
     type_included = True
     for ptype in playerTypes:
+        if ptype in ["Healer", "Tank"] and ptype != player.get("role", "None"):
+            type_included = False
+            break
         if player["playerType"] in ptype or player.get("role", "None") in ptype:
             type_included = not type_included if ptype[0] == "!" else type_included
             break
@@ -426,6 +446,7 @@ def check_conditions(player, condition):
             if (
                 str(event.get("enemyGuid")) == source
                 or str(event.get("abilityGuid")) == source
+                or str(event.get("debuffGuid")) == source
             ):
                 found_source = event[key]
             if log_event == "damage-done":
@@ -436,11 +457,14 @@ def check_conditions(player, condition):
                     found_target = event[key]
             elif log_event == "damage-taken":
                 found_target = condition[4]
+            elif log_event == "debuffs":
+                found_target = condition[4]
             if found_source and found_target:
                 break
-
+        # print(
+        #     f"{player['playerName']}-{player.get('role')},{found_source},{found_target}"
+        # )
         if found_source is not None and found_target is not None:
-            # print(player["playerName"], found_source, found_target)
             if "diff" in condition[3]:
                 if found_source > found_target:
                     results.append(False)
@@ -465,5 +489,6 @@ def check_conditions(player, condition):
                 "enemyId": event.get("enemyId"),
                 "enemyGuid": event.get("enemyGuid"),
                 "abilityGuid": event.get("abilityGuid"),
+                "debuffGuid": event.get("debuffGuid"),
             }
         )

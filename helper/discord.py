@@ -24,7 +24,7 @@ async def send_discord_post(msg):
         await context.send(f"{msg}")
 
 
-def check_message(author, max):
+def check_message(author, encounters):
     def inner_check(msg):
         if msg.author != author:
             return False
@@ -55,10 +55,16 @@ def check_message(author, max):
                 print(e)
                 return False
 
-            if mod[0] > max or mod[0] < 1:
+            encounter_fights = {}
+            for encounter in encounters:
+                encounter_fights[encounters[encounter]["id"]] = len(
+                    encounters[encounter]["fights"]
+                )
+
+            if mod[0] > len(encounters) or mod[0] < 1:
                 return False
             if len(mod) > 1:
-                if mod[1] > max or mod[1] < 1:
+                if mod[1] > encounter_fights.get(mod[0], len(encounters)) or mod[1] < 1:
                     return False
         return True
 

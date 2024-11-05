@@ -16,3 +16,18 @@ playerType = [
     "Warlock",
     "Hunter",
 ]
+
+tank_icons = [
+    "DeathKnight-Blood",
+    "Druid-Feral",
+    "Paladin-Protection",
+    "Warrior-Protection",
+]
+
+healer_icons = [
+    "Druid-Restoration",
+    "Paladin-Holy",
+    "Shaman-Restoration",
+    "Priest-Discipline",
+    "Priest-Holy",
+]

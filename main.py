@@ -89,7 +89,7 @@ async def mechanicscheck(ctx, arg, role=None):
             if fight["name"] not in encounters:
                 encounters[fight["name"]] = {"id": len(encounters) + 1, "fights": []}
             encounters[fight["name"]]["fights"].append(
-                f"  {len(encounters)}.{len(encounters[fight['name']]['fights'])+1} {get_formatted_time(fight['end_time']-fight['start_time'])}, {'kill' if fight['kill'] else 'wipe'}"
+                f"  {encounters[fight['name']]['id']}.{len(encounters[fight['name']]['fights'])+1} {get_formatted_time(fight['end_time']-fight['start_time'])}, {'kill' if fight['kill'] else 'wipe'}"
             )
 
         available_fights = []
@@ -112,7 +112,7 @@ async def mechanicscheck(ctx, arg, role=None):
 
         response = await bot.wait_for(
             "message",
-            check=check_message(ctx.author, len(encounters)),
+            check=check_message(ctx.author, encounters),
             timeout=1800,
         )
 
