@@ -1141,7 +1141,8 @@ def update_buffs(service, spreadsheetId, encounter, buffs):
                 "range": f"{encounter['name']}!{buffs[encounter['mechanics'][4][rank]['buffGuid']]}{last_index+2}",
                 "majorDimension": "ROWS",
                 "values": [
-                    [f"{player[0]}: {player[1]['totalUptime']}"] for player in ranks
+                    [f"{player[0]}: {get_formatted_time(player[1]['totalUptime'])}"]
+                    for player in ranks
                 ],
             }
         )
@@ -1265,6 +1266,7 @@ def update_debuffs(service, spreadsheetId, encounter, debuffs):
             key=lambda item: item[1]["totalUptime"],
             reverse=True,
         )[:10]
+
         request_body["data"].append(
             {
                 "range": f"{encounter['name']}!{debuffs[encounter['mechanics'][5][rank]['debuffGuid']]}{last_index+2}",
