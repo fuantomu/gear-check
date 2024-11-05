@@ -21,4 +21,32 @@
     "by": "target",
     "start": 0,
     "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "buffs",
+    "ability-id": 98245,
+    "ability-name": "Legendary Concentration (100%)",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "buffs",
+    "ability-id": 98252,
+    "ability-name": "Epic Concentration (75%)",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "buffs",
+    "ability-id": 98253,
+    "ability-name": "Rare Concentration (50%)",
+    "start": 0,
+    "end": -1
+},{
+    "hostility": "friendly",
+    "event-type": "buffs",
+    "ability-id": 98254,
+    "ability-name": "Uncommon Concentration (25%)",
+    "start": 0,
+    "end": -1
 }]
