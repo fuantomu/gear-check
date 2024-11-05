@@ -4,42 +4,48 @@
     "source-id": null,
     "target-id": 52577,
     "start": 0,
-    "end": -1
+    "end": -1,
+    "options": 8192
 },{
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
     "target-id": 53087,
     "start": 0,
-    "end": -1
+    "end": -1,
+    "options": 8192
 },{
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
     "target-id": 52558,
     "start": 0,
-    "end": -1
+    "end": -1,
+    "options": 8192
 },{
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
     "target-id": 52619,
     "start": 0,
-    "end": -1
+    "end": -1,
+    "options": 8192
 },{
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
     "target-id": 52620,
     "start": 0,
-    "end": -1
+    "end": -1,
+    "options": 8192
 },{
     "hostility": "friendly",
     "event-type": "damage-done",
     "source-id": null,
     "target-id": 53211,
     "start": 0,
-    "end": -1
+    "end": -1,
+    "options": 8192
 },{
     "hostility": "friendly",
     "event-type": "damage-taken",
