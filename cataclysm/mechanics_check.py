@@ -140,6 +140,7 @@ def get_encounter_enemies(report, start, end, checks):
                 if check.get("phase") is not None:
                     start_time = start
                     end_time = end
+                    print(f"{start},{end}")
                     for fight in fights:
                         if fight.get("kill", False) and fight["name"] == enemy["name"]:
                             for idx, phase in enumerate(fight["phases"]):
@@ -149,7 +150,7 @@ def get_encounter_enemies(report, start, end, checks):
                                     if idx + 1 < len(fight["phases"]):
                                         end_time = fight["phases"][idx + 1]["startTime"]
                                     break
-
+                    print(f"{start_time},{end_time}")
                     entities[f'{enemy["id"]}-{check.get("phase")}'] = {
                         "enemyName": enemy["name"],
                         "enemyId": f'{enemy["id"]}-{check.get("phase")}',
@@ -160,9 +161,13 @@ def get_encounter_enemies(report, start, end, checks):
                             if check["end"] == -1
                             else start_time + (check["end"] * 1000)
                         ),
-                        "checkStart": check["start"] * 1000,
+                        "checkStart": (
+                            start_time - start
+                            if check["start"] == 0
+                            else check["start"] * 1000
+                        ),
                         "checkEnd": (
-                            end_time - start_time + check["end"] * 1000
+                            end_time - start
                             if check["end"] == -1
                             else start_time + check["end"] * 1000
                         ),
