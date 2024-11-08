@@ -6,4 +6,8 @@ def enumerate_step(xs: list, start: int = 0, step: int = 1):
 
 def get_formatted_time(time):
     seconds, _ = divmod(int(time), 1000)
-    return f"{divmod(seconds,60)[0]:02d}:{divmod(seconds,60)[1]:02d}"
+    minutes, seconds = divmod(seconds, 60)
+    if minutes >= 60:
+        hours, minutes = divmod(minutes, 60)
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    return f"{minutes:02d}:{seconds:02d}"

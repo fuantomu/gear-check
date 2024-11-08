@@ -1,3 +1,6 @@
+from string import ascii_uppercase
+
+
 def get_players(gear_log):
     players = []
     players.extend(
@@ -107,3 +110,26 @@ def filter_fights(fights, filter, fight_order):
                 continue
 
     return filtered_fights
+
+
+character_list = []
+
+
+def create_character_list(length):
+    global character_list
+    ascii_list = list(ascii_uppercase)
+    for x in range(max(26, length)):
+        try:
+            character_list.append(ascii_list[x])
+        except:
+            character_list.append(
+                f"{ascii_list[x//len(ascii_list)-1]}{ascii_list[x%len(ascii_list)]}"
+            )
+
+
+def get_character(idx):
+    return character_list[idx]
+
+
+def get_character_index(value):
+    return character_list.index(value)
