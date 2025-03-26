@@ -358,7 +358,7 @@ def check_gear(character, zone):
                         
                         if low_gems:
                             output[
-                            "extreme"
+                            "major"
                             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a low level gem ({gem_stats['name']}) in a max itemlevel ({item_stats['itemlevel']}) item\n"
                     
             # Check if resilience rating on gem
