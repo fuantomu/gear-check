@@ -475,8 +475,8 @@ def get_leatherworking_enchants(version: str)-> dict:
             }
         case "mop":
             return {
-                "legs": [],
-                "wrists": []
+                "legs": [4881,4882,4880],
+                "wrists": [4875,4879,4878,4877]
             }
         case _:
             return {
@@ -493,8 +493,8 @@ def get_tailoring_enchants(version: str) -> dict:
             }
         case "mop":
             return {
-                "legs": [],
-                "cloak": []
+                "legs": [4896,4895],
+                "cloak": [4893,4892,4894]
             }
         case _:
             return {
@@ -510,7 +510,7 @@ def get_inscription_enchants(version: str)-> dict:
             }
         case "mop":
             return {
-                "shoulders": []
+                "shoulders": [4915,4912,4914,4913]
             }
         case _:
             return {
@@ -520,20 +520,22 @@ def get_inscription_enchants(version: str)-> dict:
 def get_alchemy_trinket(version: str) -> list:
     match version:
         case "cataclysm": return [58483, 68775, 68776, 68777]
-        case "mop": return []
+        case "mop": return [75274]
         case _: return []
 
 def get_leg_enchants(version: str)-> dict:
     match version:
         case "cataclysm": return {
-            "leatherworking": [4127, 4126, 4270],
-            "caster": [4109, 4110, 4111, 4112, 4113, 4114],
-            "tailoring": [4110, 4112],
-            "physical": [4122, 4124, 4126, 4127, 4126, 4270, 4438, 4439, 4440]
+            "leatherworking": [4127, 4126, 4270], # leatherworking created enchants
+            "caster": [4109, 4110, 4111, 4112, 4113, 4114], # all existing caster enchants
+            "tailoring": [4110, 4112], # tailoring created enchants
+            "physical": [4122, 4124, 4126, 4127, 4126, 4270, 4438, 4439, 4440] # all existing physical enchants
         }
         case "mop": return {
-            "physical": [],
-            "caster": []
+            "leatherworking": [4823,4824,4822],
+            "caster": [4825, 4826,5003, 5004, 4896, 4895],
+            "tailoring": [4825, 4826],
+            "physical": [4823,4824,4822,4881,4882,4880,4872,4871,4870]
         }
         case _: return {
             "physical": [],

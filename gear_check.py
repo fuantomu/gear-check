@@ -239,15 +239,15 @@ def check_gear(character, zone):
                             f'{str(item_stats["permanentEnchant"])} - {str(item_stats["permanentEnchantName"])}'
                         )
 
-        # Only check engineering enchants for cataclysm
-        if game_version == "cataclysm":
+        # Only check engineering enchants for specific versions
+        if game_version in ["cataclysm","mop"]:
             if item_stats["slot"] == 5 and item.get("onUseEnchant") != 4223:  # Nitro Boosts
                 item_stats["missing"] = "Nitro Boosts"
                 professions["engineering"]["found"] -= 1
                 professions["engineering"]["items"].append(item_stats)
             if (
                 item_stats["slot"] == 9
-                and item.get("onUseEnchant") != 4179
+                and item.get("onUseEnchant") not in [4179,4898]
                 and spec not in ["Guardian", "Blood", "Protection"]
             ):  # Synapse Springs
                 item_stats["missing"] = "Synapse Springs"
