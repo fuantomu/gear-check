@@ -6,15 +6,17 @@ warcraft_logs_url = "https://www.warcraftlogs.com:443/v1/report/"
 
 
 def get_log(report: str):
+    if "http" in report:
+        report = report.split("/")[-1]
     url = f'{warcraft_logs_url}fights/{report}?api_key={os.getenv("WCL_USERID")}&boss=-2'
-    print(url)
     log_data = requests.get(url)
     return log_data.json()
 
 
 def get_log_summary(report: str):
+    if "http" in report:
+        report = report.split("/")[-1]
     url = f'{warcraft_logs_url}tables/summary/{report}?start=0&end=999999999999&api_key={os.getenv("WCL_USERID")}'
-    print(url)
     log_data = requests.get(url)
     return log_data.json().get("playerDetails")
 
