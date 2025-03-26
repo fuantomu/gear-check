@@ -230,7 +230,7 @@ def check_gear(character, zone):
                 if not found_enchant:
                     output[
                         "extreme"
-                    ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an incorrect enchant (Unknown enchant or low level)\n"
+                    ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an incorrect enchant (Unknown enchant or low level) - {str(item_stats['permanentEnchantName'])}\n"
                     with open(f"unknown_enchants", "a") as f:
                         f.write(
                             f"\n{character.get('name')} - {slots[item_stats['slot']]}\n"
