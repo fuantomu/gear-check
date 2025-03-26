@@ -137,7 +137,7 @@ def check_gear(character, zone):
                     if enchant["id"] == item_stats["permanentEnchant"]:
 
                         found_enchant = True
-                        if enchant.get("version") != game_version:
+                        if enchant.get("version") != game_version and enchant.get("version") != "any":
                             output[
                                     "extreme"
                             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an enchant from a different expansion: {enchant['name']}\n"
