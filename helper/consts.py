@@ -1,8 +1,8 @@
-zone_itemlevel = {
-    1023: {"min": 346, "max": 372},  # 25-player BWD/TOFW/BOT
-    1024: {"min": 346, "max": 372},  # 10-player BWD/TOFW/BOT
-    1027: {"min": 372, "max": 391},  # Firelands
-    1033: {"min": 384, "max": 410}   # Dragon Soul
+zones = {
+    1023: {"version": "cataclysm", "min": 346, "max": 372, "gem_primary_min": 40, "gem_secondary_min": 20},  # 25-player BWD/TOFW/BOT
+    1024: {"version": "cataclysm", "min": 346, "max": 372, "gem_primary_min": 40, "gem_secondary_min": 20},  # 10-player BWD/TOFW/BOT
+    1027: {"version": "cataclysm", "min": 372, "max": 391, "gem_primary_min": 40, "gem_secondary_min": 20},  # Firelands
+    1033: {"version": "cataclysm", "min": 384, "max": 410, "gem_primary_min": 40, "gem_secondary_min": 20, "gem_primary_max": 50, "gem_secondary_max": 25}   # Dragon Soul
 }
 
 slots = {
@@ -38,7 +38,7 @@ gem_class = {
     10: [],  # Cogwheel
 }
 
-main_attributes = ["int", "str", "agi", "spi"]
+main_attributes = ["int", "str", "agi", "spi", "sta"]
 
 gem_attributes = [
     "int",

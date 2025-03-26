@@ -1,3 +1,4 @@
 discord
 __pycache__
 .env
+token.json
