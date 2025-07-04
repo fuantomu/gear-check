@@ -15,6 +15,7 @@ playerType = [
     "Mage",
     "Warlock",
     "Hunter",
+    "Monk"
 ]
 
 tank_icons = [
@@ -22,6 +23,7 @@ tank_icons = [
     "Druid-Feral",
     "Paladin-Protection",
     "Warrior-Protection",
+    "Monk-Brewmaster"
 ]
 
 healer_icons = [
@@ -30,4 +32,5 @@ healer_icons = [
     "Shaman-Restoration",
     "Priest-Discipline",
     "Priest-Holy",
+    "Monk-Mistweaver"
 ]

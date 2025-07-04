@@ -248,7 +248,7 @@ spec_attributes = {
             ["agi", "mlecritstrkrtng", "rgdcritstrkrtng", "splcritstrkrtng"],
         ],
     },
-    "Hunter-Beastmastery": {
+    "Hunter-BeastMastery": {
         "mainstat": ["agi"],
         "gems": [
             ["agi"],

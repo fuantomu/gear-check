@@ -18,6 +18,7 @@ def update_class_color(
         "Shaman": {"red": 31, "green": 105, "blue": 235},
         "Paladin": {"red": 244, "green": 140, "blue": 186},
         "DeathKnight": {"red": 196, "green": 30, "blue": 58},
+        "Monk": {"red": 0, "green": 255, "blue": 150},
         "Unknown": {"red": 255, "green": 0, "blue": 0},
     }
     request_body = [
