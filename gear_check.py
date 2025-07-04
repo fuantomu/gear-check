@@ -10,6 +10,10 @@ import os
 load_dotenv(override=True)
 
 ignore_slots = [3, 18]
+ignore_slots = {
+    "cataclysm": [3, 18],
+    "mop": [3, 17, 18]
+}
 ignore_enchant = {
     "cataclysm": [1, 5, 12, 13, 17],
     "mop": [0, 1, 5, 12, 13, 17]
@@ -499,7 +503,7 @@ def check_gear(character, zone):
             output["extreme"] += f"Meta gem is not active!\n"
 
     for item, id in found_items.items():
-        if item in ignore_slots:
+        if item in ignore_slots[game_version]:
             continue
         if id == 0:
             if item == 16 and found_items[15] != 0:
