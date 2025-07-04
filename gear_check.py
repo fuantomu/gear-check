@@ -9,14 +9,13 @@ import os
 
 load_dotenv(override=True)
 
-ignore_slots = [3, 18]
 ignore_slots = {
     "cataclysm": [3, 18],
     "mop": [3, 17, 18]
 }
 ignore_enchant = {
-    "cataclysm": [1, 5, 12, 13, 17],
-    "mop": [0, 1, 5, 12, 13, 17]
+    "cataclysm": [1, 3, 5, 12, 13, 17, 18],
+    "mop": [0, 1, 3, 5, 12, 13, 17, 18]
 }
 
 wowhead_link = {
@@ -104,7 +103,7 @@ def check_gear(character, zone):
 
         if item_stats["itemlevel"] < zones[zone]["min"] and item_stats[
             "id"
-        ] not in bis_items.get(str(zone), []):
+        ] not in bis_items.get(str(zone), []) and item_stats["slot"] not in ignore_slots[game_version]:
             output[
                 "extreme"
             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is < {zones[zone]['min']}\n"
@@ -317,7 +316,7 @@ def check_gear(character, zone):
                             ]
                             for attr in total_attributes
                         ]
-                    ):
+                    ) and game_version != "mop":
                         output[
                             "major"
                         ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not their primary stat ({gem_stats['name']})\n"
