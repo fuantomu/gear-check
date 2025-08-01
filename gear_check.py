@@ -39,7 +39,7 @@ def load_enchants():
     try:
         global enchants
         enchants = requests.get(
-            "https://raw.githubusercontent.com/fuantomu/envy-armory/main/enchants.json"
+            "https://raw.githubusercontent.com/fuantomu/envy-armory/refs/heads/main/enchants.json"
         ).json()
         print(f"Loaded {sum([len(enchants[slot]) for slot in enchants])} enchants")
     except:
@@ -115,7 +115,7 @@ def check_gear(character, zone):
             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is a PvP item\n"
 
         if item_stats["slot"] not in ignore_enchant[game_version] or (
-            item_stats["slot"] == 17 and character["type"] == "Hunter"
+            item_stats["slot"] == 17 and character["type"] == "Hunter" and game_version != "mop"
         ):
             if item_stats["permanentEnchant"] is None:
                 if not item_stats["slot"] in [
@@ -136,7 +136,6 @@ def check_gear(character, zone):
             else:
                 found_enchant = False
                 for enchant in enchants[str(item_stats["slot"])]:
-
                     if enchant["id"] == item_stats["permanentEnchant"]:
 
                         found_enchant = True
@@ -234,7 +233,7 @@ def check_gear(character, zone):
                     output[
                         "extreme"
                     ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an incorrect enchant (Unknown enchant or low level) - {str(item_stats['permanentEnchantName'])}\n"
-                    with open(f"unknown_enchants", "a") as f:
+                    with open(f"{os.getenv('GAME_VERSION')}/unknown_enchants", "a") as f:
                         f.write(
                             f"\n{character.get('name')} - {slots[item_stats['slot']]}\n"
                         )
@@ -342,9 +341,9 @@ def check_gear(character, zone):
                     if item_stats["itemlevel"] < zones[zone]["max"]:
 
                         if len([stat for stat in gem_stats.keys() if stat in gem_attributes]) > 1:
-                            low_gems = all([val >= 0 and val < zones[zone].get("gem_secondary_min") for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), gem_stats.get("sta",0) / 1.5, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0)]])
+                            low_gems = all([val >= 0 and val < zones[zone].get("gem_secondary_min") for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), (gem_stats.get("sta",0) * 1.34 if game_version == "mop" else 0.67) , gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0), gem_stats.get("parryrtng", 0)]])
                         else:
-                            low_gems = all([val >= 0 and val < zones[zone].get("gem_primary_min") for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), gem_stats.get("sta",0) / 1.5, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0)]])
+                            low_gems = all([val >= 0 and val < zones[zone].get("gem_primary_min") for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), (gem_stats.get("spi",0) * 1.34 if game_version == "mop" else 0.67), gem_stats.get("sta",0) * 1.34 if game_version == "mop" else 0.67, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0), gem_stats.get("parryrtng", 0)]])
                         
                         if low_gems:
                             output[
@@ -355,9 +354,9 @@ def check_gear(character, zone):
                     if item_stats["itemlevel"] >= zones[zone]["max"]:
 
                         if len([stat for stat in gem_stats.keys() if stat in gem_attributes]) > 1:
-                            low_gems = all([val >= 0 and val < zones[zone].get("gem_secondary_max", zones[zone]["gem_secondary_min"]) for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), gem_stats.get("sta",0) / 1.5, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0)]])
+                            low_gems = all([val >= 0 and val < zones[zone].get("gem_secondary_max", zones[zone]["gem_secondary_min"]) for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), gem_stats.get("sta",0) / 1.5, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0), gem_stats.get("parryrtng", 0)]])
                         else:
-                            low_gems = all([val >= 0 and val < zones[zone].get("gem_primary_max", zones[zone]["gem_primary_min"]) for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), gem_stats.get("sta",0) / 1.5, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0)]])
+                            low_gems = all([val >= 0 and val < zones[zone].get("gem_primary_max", zones[zone]["gem_primary_min"]) for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), gem_stats.get("sta",0) / 1.5, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0), gem_stats.get("parryrtng", 0)]])
                         
                         if low_gems:
                             output[
@@ -433,7 +432,7 @@ def check_gear(character, zone):
                 output[
                     "major"
                 ] += f"{profession[1]['items'][0]['name']} ({slots[profession[1]['items'][0]['slot']]}) missing blacksmithing socket\n"
-            if profession[0] == "jewelcrafting" and profession[1]["found"] < 3:
+            if profession[0] == "jewelcrafting" and profession[1]["found"] < jewelcrafting_gem_count[game_version]:
                 item_text = ",".join(
                     [
                         f"{found_item['name']} ({slots[found_item['slot']]})"
@@ -509,13 +508,14 @@ def check_gear(character, zone):
                 continue
             output["extreme"] += f"Missing item in {slots[item]}\n"
 
-    with open("cataclysm/items.json", "w") as f:
+    with open(f"{os.getenv('GAME_VERSION')}/items.json", "w") as f:
         json.dump(item_cache, f)
 
     return output
 
 
 def get_wowhead_item(id, game_version):
+
     if item_cache.get(str(id)) is None:
         print(f"Requesting item {id} from wowhead")
         wowhead_response = requests.get(wowhead_link[game_version].replace("ITEMID", str(id)))
@@ -540,16 +540,19 @@ def get_wowhead_item(id, game_version):
         if parsed_item["class"] == 3 and parsed_item["subclass"] == 6:
             parsed_item["meta"] = {}
 
-            requirements = re.findall(
-                r'<div class="q0">(.*?)<\/div>',
-                parsed_xml["wowhead"]["item"]["htmlTooltip"],
-            )[0].split("<br />")
-            for entry in requirements:
-                if "Red" in entry:
-                    parsed_item["meta"][0] = int(re.findall(r"([0-9])", entry)[0])
-                elif "Blue" in entry:
-                    parsed_item["meta"][1] = int(re.findall(r"([0-9])", entry)[0])
-                elif "Yellow" in entry:
-                    parsed_item["meta"][2] = int(re.findall(r"([0-9])", entry)[0])
+            try:
+                requirements = re.findall(
+                    r'<div class="q0">(.*?)<\/div>',
+                    parsed_xml["wowhead"]["item"]["htmlTooltip"],
+                )[0].split("<br />")
+                for entry in requirements:
+                    if "Red" in entry:
+                        parsed_item["meta"][0] = int(re.findall(r"([0-9])", entry)[0])
+                    elif "Blue" in entry:
+                        parsed_item["meta"][1] = int(re.findall(r"([0-9])", entry)[0])
+                    elif "Yellow" in entry:
+                        parsed_item["meta"][2] = int(re.findall(r"([0-9])", entry)[0])
+            except:
+                pass
         item_cache[str(id)] = parsed_item
     return item_cache[str(id)]

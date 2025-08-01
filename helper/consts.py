@@ -2,7 +2,9 @@ zones = {
     1023: {"version": "cataclysm", "min": 346, "max": 372, "gem_primary_min": 40, "gem_secondary_min": 20},  # 25-player BWD/TOFW/BOT
     1024: {"version": "cataclysm", "min": 346, "max": 372, "gem_primary_min": 40, "gem_secondary_min": 20},  # 10-player BWD/TOFW/BOT
     1027: {"version": "cataclysm", "min": 372, "max": 391, "gem_primary_min": 40, "gem_secondary_min": 20},  # Firelands
-    1033: {"version": "cataclysm", "min": 384, "max": 410, "gem_primary_min": 40, "gem_secondary_min": 20, "gem_primary_max": 50, "gem_secondary_max": 25}   # Dragon Soul
+    1033: {"version": "cataclysm", "min": 384, "max": 410, "gem_primary_min": 40, "gem_secondary_min": 20, "gem_primary_max": 50, "gem_secondary_max": 25},   # Dragon Soul
+    1038: {"version": "mop", "min": 463, "max": 502, "gem_primary_min": 80, "gem_secondary_min": 160}, # Mogu'shan Vaults
+    1040: {"version": "mop", "min": 489, "max": 509, "gem_primary_min": 80, "gem_secondary_min": 160} # Heart of Fear
 }
 
 slots = {
@@ -124,7 +126,7 @@ spec_attributes = {
         "gems": [["sta"], ["mastrtng", "sta"]],
     },
     "Druid-Restoration": {
-        "mainstat": ["int"],
+        "mainstat": ["int", "spi"],
         "gems": [
             ["int"],
             ["int", "spi"],
@@ -148,7 +150,7 @@ spec_attributes = {
         ],
     },
     "Shaman-Restoration": {
-        "mainstat": ["int"],
+        "mainstat": ["int", "spi"],
         "gems": [
             ["int"],
             ["int", "spi"],
@@ -190,7 +192,7 @@ spec_attributes = {
         ],
     },
     "Priest-Discipline": {
-        "mainstat": ["int"],
+        "mainstat": ["int", "spi"],
         "gems": [
             ["int"],
             ["int", "spi"],
@@ -198,7 +200,7 @@ spec_attributes = {
         ],
     },
     "Priest-Holy": {
-        "mainstat": ["int"],
+        "mainstat": ["int", "spi"],
         "gems": [
             ["int"],
             ["int", "spi"],
@@ -329,7 +331,7 @@ spec_attributes = {
         ],
     },
     "Paladin-Holy": {
-        "mainstat": ["int"],
+        "mainstat": ["int", "spi"],
         "gems": [
             ["int"],
             ["int", "spi"],
@@ -358,7 +360,9 @@ spec_attributes = {
     "Monk-Brewmaster": {
         "mainstat": ["agi", "sta"],
         "gems": [
-            ["sta"]
+            ["sta"],
+            ["agi", "mlecritstrkrtng", "rgdcritstrkrtng", "splcritstrkrtng"],
+            ["mlecritstrkrtng", "rgdcritstrkrtng", "splcritstrkrtng"]
         ]
     },
     "Monk-Windwalker": {
@@ -368,7 +372,7 @@ spec_attributes = {
         ]
     },
     "Monk-Mistweaver": {
-        "mainstat": ["int"],
+        "mainstat": ["int", "spi"],
         "gems": [
             ["int"]
         ]
@@ -465,6 +469,11 @@ class_types = {
 }
 
 spec_stats = {"Guardian": "agility"}
+
+jewelcrafting_gem_count = {
+    "cataclysm": 3,
+    "mop": 2
+}
 
 def get_leatherworking_enchants(version: str)-> dict:
     match version:
