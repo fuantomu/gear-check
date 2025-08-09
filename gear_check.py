@@ -384,7 +384,7 @@ def check_gear(character, zone):
 
         # Find alchemy trinket
         if item_stats["slot"] in [12, 13]:
-            if item_stats["id"] in get_alchemy_trinket(game_version):
+            if int(item_stats["id"]) in get_alchemy_trinket(game_version):
                 professions["alchemy"]["found"] += 1
 
         # Check for incorrect armor type
