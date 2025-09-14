@@ -37,6 +37,7 @@ gem_class = {
     4: [1, 2],  # Green
     5: [0, 2],  # Orange
     8: [0, 1, 2],  # Prismatic
+    9: [],  # Sha
     10: [],  # Cogwheel
 }
 
