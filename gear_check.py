@@ -100,7 +100,7 @@ def check_gear(character, zone):
         item_stats["gems"] = item.get("gems", [])
 
         if (
-            item_stats["itemlevel"] < zones[zone]["min"]
+            item["itemLevel"] < zones[zone]["min"]
             and item_stats["id"] not in bis_items.get(str(zone), [])
             and item_stats["slot"] not in ignore_slots[game_version]
         ):
@@ -159,19 +159,19 @@ def check_gear(character, zone):
                                 "extreme"
                             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an enchant from a different expansion: {enchant['name']}\n"
                         elif enchant["tier"] >= 2:
-                            if item_stats["itemlevel"] >= zones[zone]["max"]:
+                            if item["itemLevel"] >= zones[zone]["max"]:
                                 output[
                                     "extreme"
-                                ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is {zones[zone]['max']} or higher and has a very low level enchant: {enchant['name']}\n"
+                                ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is {item['itemLevel']} or higher and has a very low level enchant: {enchant['name']}\n"
                             else:
                                 output[
                                     "major"
                                 ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a very low level enchant: {enchant['name']}\n"
                         elif enchant["tier"] == 1:
-                            if item_stats["itemlevel"] == zones[zone]["max"]:
+                            if item["itemLevel"] == zones[zone]["max"]:
                                 output[
                                     "major"
-                                ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is {zones[zone]['max']} and has a low level enchant: {enchant['name']}\n"
+                                ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is {item['itemLevel']} and has a low level enchant: {enchant['name']}\n"
                             else:
                                 output[
                                     "minor"
