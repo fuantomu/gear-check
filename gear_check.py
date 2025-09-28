@@ -9,18 +9,15 @@ import os
 
 load_dotenv(override=True)
 
-ignore_slots = {
-    "cataclysm": [3, 18],
-    "mop": [3, 17, 18]
-}
+ignore_slots = {"cataclysm": [3, 18], "mop": [3, 17, 18]}
 ignore_enchant = {
     "cataclysm": [1, 3, 5, 12, 13, 17, 18],
-    "mop": [0, 1, 3, 5, 12, 13, 17, 18]
+    "mop": [0, 1, 3, 5, 12, 13, 17, 18],
 }
 
 wowhead_link = {
     "cataclysm": "https://www.wowhead.com/cata/item=ITEMID?xml",
-    "mop": "https://www.wowhead.com/mop/item=ITEMID?xml"
+    "mop": "https://www.wowhead.com/mop/item=ITEMID?xml",
 }
 
 item_cache = {}
@@ -34,6 +31,7 @@ with open(f"{os.getenv('GAME_VERSION')}/bis_items.json", "r") as f:
     print(f"Loaded bis items for {len(bis_items)} zones from cache")
 
 enchants = {}
+
 
 def load_enchants():
     try:
@@ -82,7 +80,7 @@ def check_gear(character, zone):
     meta = None
     for item in gear:
         found_items[item["slot"]] = item["id"]
-        if item["slot"] in ignore_slots or item["id"] == 0:
+        if item["slot"] in ignore_slots[game_version] or item["id"] == 0:
             continue
 
         try:
@@ -101,12 +99,24 @@ def check_gear(character, zone):
         item_stats["onUseEnchant"] = item.get("onUseEnchant")
         item_stats["gems"] = item.get("gems", [])
 
-        if item_stats["itemlevel"] < zones[zone]["min"] and item_stats[
-            "id"
-        ] not in bis_items.get(str(zone), []) and item_stats["slot"] not in ignore_slots[game_version]:
+        if (
+            item_stats["itemlevel"] < zones[zone]["min"]
+            and item_stats["id"] not in bis_items.get(str(zone), [])
+            and item_stats["slot"] not in ignore_slots[game_version]
+        ):
             output[
                 "extreme"
             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) itemlevel is < {zones[zone]['min']}\n"
+
+        if game_version == "mop":
+            if item["itemLevel"] == item_stats["itemlevel"]:
+                output[
+                    "extreme"
+                ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is not upgraded\n"
+            if item["itemLevel"] == item_stats["itemlevel"] - 4:
+                output[
+                    "major"
+                ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is only upgraded once\n"
 
         # Check if resilience rating on gem
         if "resirtng" in item_stats.keys():
@@ -115,7 +125,9 @@ def check_gear(character, zone):
             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) is a PvP item\n"
 
         if item_stats["slot"] not in ignore_enchant[game_version] or (
-            item_stats["slot"] == 17 and character["type"] == "Hunter" and game_version != "mop"
+            item_stats["slot"] == 17
+            and character["type"] == "Hunter"
+            and game_version != "mop"
         ):
             if item_stats["permanentEnchant"] is None:
                 if not item_stats["slot"] in [
@@ -139,9 +151,12 @@ def check_gear(character, zone):
                     if enchant["id"] == item_stats["permanentEnchant"]:
 
                         found_enchant = True
-                        if enchant.get("version") != game_version and enchant.get("version") != "any":
+                        if (
+                            enchant.get("version") != game_version
+                            and enchant.get("version") != "any"
+                        ):
                             output[
-                                    "extreme"
+                                "extreme"
                             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an enchant from a different expansion: {enchant['name']}\n"
                         elif enchant["tier"] >= 2:
                             if item_stats["itemlevel"] >= zones[zone]["max"]:
@@ -190,19 +205,28 @@ def check_gear(character, zone):
 
                         # Check if tailoring/leatherworking leg enchant exists
                         if item_stats["slot"] == 6:
-                            if enchant["id"] in get_leatherworking_enchants(game_version)["legs"]:
+                            if (
+                                enchant["id"]
+                                in get_leatherworking_enchants(game_version)["legs"]
+                            ):
                                 professions["leatherworking"]["found"] += 1
                             else:
                                 professions["leatherworking"]["items"].append(
                                     item_stats
                                 )
-                            if enchant["id"] in get_tailoring_enchants(game_version)["legs"]:
+                            if (
+                                enchant["id"]
+                                in get_tailoring_enchants(game_version)["legs"]
+                            ):
                                 professions["tailoring"]["found"] += 1
                             else:
                                 professions["tailoring"]["items"].append(item_stats)
                         # Check if leatherworking bracer enchant exists
                         if item_stats["slot"] == 8:
-                            if enchant["id"] in get_leatherworking_enchants(game_version)["wrists"]:
+                            if (
+                                enchant["id"]
+                                in get_leatherworking_enchants(game_version)["wrists"]
+                            ):
                                 professions["leatherworking"]["found"] += 1
                             else:
                                 professions["leatherworking"]["items"].append(
@@ -210,13 +234,19 @@ def check_gear(character, zone):
                                 )
                         # Check if inscription shoulder enchant exists
                         if item_stats["slot"] == 2:
-                            if enchant["id"] in get_inscription_enchants(game_version)["shoulders"]:
+                            if (
+                                enchant["id"]
+                                in get_inscription_enchants(game_version)["shoulders"]
+                            ):
                                 professions["inscription"]["found"] += 1
                             else:
                                 professions["inscription"]["items"].append(item_stats)
                         # Check if tailoring cloak enchant exist
                         if item_stats["slot"] == 14:
-                            if enchant["id"] in get_tailoring_enchants(game_version)["cloak"]:
+                            if (
+                                enchant["id"]
+                                in get_tailoring_enchants(game_version)["cloak"]
+                            ):
                                 # If class main stat is agility/strength, ignore tailoring leg enchant
                                 if (
                                     spec in class_types["agility"]
@@ -233,7 +263,9 @@ def check_gear(character, zone):
                     output[
                         "extreme"
                     ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has an incorrect enchant (Unknown enchant or low level) - {str(item_stats['permanentEnchantName'])}\n"
-                    with open(f"{os.getenv('GAME_VERSION')}/unknown_enchants", "a") as f:
+                    with open(
+                        f"{os.getenv('GAME_VERSION')}/unknown_enchants", "a"
+                    ) as f:
                         f.write(
                             f"\n{character.get('name')} - {slots[item_stats['slot']]}\n"
                         )
@@ -242,14 +274,16 @@ def check_gear(character, zone):
                         )
 
         # Only check engineering enchants for specific versions
-        if game_version in ["cataclysm","mop"]:
-            if item_stats["slot"] == 5 and item.get("onUseEnchant") != 4223:  # Nitro Boosts
+        if game_version in ["cataclysm", "mop"]:
+            if (
+                item_stats["slot"] == 5 and item.get("onUseEnchant") != 4223
+            ):  # Nitro Boosts
                 item_stats["missing"] = "Nitro Boosts"
                 professions["engineering"]["found"] -= 1
                 professions["engineering"]["items"].append(item_stats)
             if (
                 item_stats["slot"] == 9
-                and item.get("onUseEnchant") not in [4179,4898]
+                and item.get("onUseEnchant") not in [4179, 4898]
                 and spec not in ["Guardian", "Blood", "Protection"]
             ):  # Synapse Springs
                 item_stats["missing"] = "Synapse Springs"
@@ -307,15 +341,18 @@ def check_gear(character, zone):
                         ]
                     ]
                 ):
-                    if not any(
-                        [
-                            attr
-                            in spec_attributes[f"{character['type']}-{spec}"][
-                                "mainstat"
+                    if (
+                        not any(
+                            [
+                                attr
+                                in spec_attributes[f"{character['type']}-{spec}"][
+                                    "mainstat"
+                                ]
+                                for attr in total_attributes
                             ]
-                            for attr in total_attributes
-                        ]
-                    ) and game_version != "mop":
+                        )
+                        and game_version != "mop"
+                    ):
                         output[
                             "major"
                         ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not their primary stat ({gem_stats['name']})\n"
@@ -331,7 +368,6 @@ def check_gear(character, zone):
                     #     output[
                     #         "minor"
                     #     ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a non-optimal gem ({attribute_string})\n"
-                
 
                 # Add color of gem to total sockets
                 for color in gem_class[gem_stats["subclass"]]:
@@ -340,29 +376,143 @@ def check_gear(character, zone):
                     # Itemlevel is not max
                     if item_stats["itemlevel"] < zones[zone]["max"]:
 
-                        if len([stat for stat in gem_stats.keys() if stat in gem_attributes]) > 1:
-                            low_gems = all([val >= 0 and val < zones[zone].get("gem_secondary_min") for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), (gem_stats.get("sta",0) * 1.34 if game_version == "mop" else 0.67) , gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0), gem_stats.get("parryrtng", 0)]])
+                        if (
+                            len(
+                                [
+                                    stat
+                                    for stat in gem_stats.keys()
+                                    if stat in gem_attributes
+                                ]
+                            )
+                            > 1
+                        ):
+                            low_gems = all(
+                                [
+                                    val >= 0
+                                    and val < zones[zone].get("gem_secondary_min")
+                                    for val in [
+                                        gem_stats.get("str", 0),
+                                        gem_stats.get("int", 0),
+                                        gem_stats.get("agi", 0),
+                                        gem_stats.get("spi", 0),
+                                        (
+                                            gem_stats.get("sta", 0) * 1.34
+                                            if game_version == "mop"
+                                            else 0.67
+                                        ),
+                                        gem_stats.get("splhastertng", 0),
+                                        gem_stats.get("splhitrtng", 0),
+                                        gem_stats.get("mlecritstrkrtng", 0),
+                                        gem_stats.get("mastrtng", 0),
+                                        gem_stats.get("exprtng", 0),
+                                        gem_stats.get("dodgertng", 0),
+                                        gem_stats.get("parryrtng", 0),
+                                    ]
+                                ]
+                            )
                         else:
-                            low_gems = all([val >= 0 and val < zones[zone].get("gem_primary_min") for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), (gem_stats.get("spi",0) * 1.34 if game_version == "mop" else 0.67), gem_stats.get("sta",0) * 1.34 if game_version == "mop" else 0.67, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0), gem_stats.get("parryrtng", 0)]])
-                        
+                            low_gems = all(
+                                [
+                                    val >= 0
+                                    and val < zones[zone].get("gem_primary_min")
+                                    for val in [
+                                        gem_stats.get("str", 0),
+                                        gem_stats.get("int", 0),
+                                        gem_stats.get("agi", 0),
+                                        (
+                                            gem_stats.get("spi", 0) * 1.34
+                                            if game_version == "mop"
+                                            else 0.67
+                                        ),
+                                        (
+                                            gem_stats.get("sta", 0) * 1.34
+                                            if game_version == "mop"
+                                            else 0.67
+                                        ),
+                                        gem_stats.get("splhastertng", 0),
+                                        gem_stats.get("splhitrtng", 0),
+                                        gem_stats.get("mlecritstrkrtng", 0),
+                                        gem_stats.get("mastrtng", 0),
+                                        gem_stats.get("exprtng", 0),
+                                        gem_stats.get("dodgertng", 0),
+                                        gem_stats.get("parryrtng", 0),
+                                    ]
+                                ]
+                            )
+
                         if low_gems:
                             output[
-                            "major"
+                                "major"
                             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a low level gem ({gem_stats['name']})\n"
-                    
+
                     # Itemlevel is max
                     if item_stats["itemlevel"] >= zones[zone]["max"]:
 
-                        if len([stat for stat in gem_stats.keys() if stat in gem_attributes]) > 1:
-                            low_gems = all([val >= 0 and val < zones[zone].get("gem_secondary_max", zones[zone]["gem_secondary_min"]) for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), gem_stats.get("sta",0) / 1.5, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0), gem_stats.get("parryrtng", 0)]])
+                        if (
+                            len(
+                                [
+                                    stat
+                                    for stat in gem_stats.keys()
+                                    if stat in gem_attributes
+                                ]
+                            )
+                            > 1
+                        ):
+                            low_gems = all(
+                                [
+                                    val >= 0
+                                    and val
+                                    < zones[zone].get(
+                                        "gem_secondary_max",
+                                        zones[zone]["gem_secondary_min"],
+                                    )
+                                    for val in [
+                                        gem_stats.get("str", 0),
+                                        gem_stats.get("int", 0),
+                                        gem_stats.get("agi", 0),
+                                        gem_stats.get("spi", 0),
+                                        gem_stats.get("sta", 0) / 1.5,
+                                        gem_stats.get("splhastertng", 0),
+                                        gem_stats.get("splhitrtng", 0),
+                                        gem_stats.get("mlecritstrkrtng", 0),
+                                        gem_stats.get("mastrtng", 0),
+                                        gem_stats.get("exprtng", 0),
+                                        gem_stats.get("dodgertng", 0),
+                                        gem_stats.get("parryrtng", 0),
+                                    ]
+                                ]
+                            )
                         else:
-                            low_gems = all([val >= 0 and val < zones[zone].get("gem_primary_max", zones[zone]["gem_primary_min"]) for val in [gem_stats.get("str",0), gem_stats.get("int",0), gem_stats.get("agi",0), gem_stats.get("spi",0), gem_stats.get("sta",0) / 1.5, gem_stats.get("splhastertng", 0), gem_stats.get("splhitrtng", 0), gem_stats.get("mlecritstrkrtng", 0), gem_stats.get("mastrtng", 0), gem_stats.get("exprtng", 0), gem_stats.get("dodgertng", 0), gem_stats.get("parryrtng", 0)]])
-                        
+                            low_gems = all(
+                                [
+                                    val >= 0
+                                    and val
+                                    < zones[zone].get(
+                                        "gem_primary_max",
+                                        zones[zone]["gem_primary_min"],
+                                    )
+                                    for val in [
+                                        gem_stats.get("str", 0),
+                                        gem_stats.get("int", 0),
+                                        gem_stats.get("agi", 0),
+                                        gem_stats.get("spi", 0),
+                                        gem_stats.get("sta", 0) / 1.5,
+                                        gem_stats.get("splhastertng", 0),
+                                        gem_stats.get("splhitrtng", 0),
+                                        gem_stats.get("mlecritstrkrtng", 0),
+                                        gem_stats.get("mastrtng", 0),
+                                        gem_stats.get("exprtng", 0),
+                                        gem_stats.get("dodgertng", 0),
+                                        gem_stats.get("parryrtng", 0),
+                                    ]
+                                ]
+                            )
+
                         if low_gems:
                             output[
-                            "major"
+                                "major"
                             ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a low level gem ({gem_stats['name']}) in a max itemlevel ({item_stats['itemlevel']}) item\n"
-                    
+
             # Check if resilience rating on gem
             if "resirtng" in gem_stats.keys():
                 output[
@@ -432,7 +582,10 @@ def check_gear(character, zone):
                 output[
                     "major"
                 ] += f"{profession[1]['items'][0]['name']} ({slots[profession[1]['items'][0]['slot']]}) missing blacksmithing socket\n"
-            if profession[0] == "jewelcrafting" and profession[1]["found"] < jewelcrafting_gem_count[game_version]:
+            if (
+                profession[0] == "jewelcrafting"
+                and profession[1]["found"] < jewelcrafting_gem_count[game_version]
+            ):
                 item_text = ",".join(
                     [
                         f"{found_item['name']} ({slots[found_item['slot']]})"
@@ -453,7 +606,8 @@ def check_gear(character, zone):
                 other_leg_enchant = [
                     other_enchant
                     for other_enchant in profession[1]["items"]
-                    if other_enchant.get("permanentEnchant") in get_leg_enchants(game_version)["leatherworking"]
+                    if other_enchant.get("permanentEnchant")
+                    in get_leg_enchants(game_version)["leatherworking"]
                     or (
                         other_enchant.get("permanentEnchant")
                         in get_leg_enchants(game_version)["caster"]
@@ -472,7 +626,8 @@ def check_gear(character, zone):
                 other_leg_enchant = [
                     other_enchant
                     for other_enchant in profession[1]["items"]
-                    if other_enchant.get("permanentEnchant") in get_leg_enchants(game_version)["tailoring"]
+                    if other_enchant.get("permanentEnchant")
+                    in get_leg_enchants(game_version)["tailoring"]
                     or (
                         other_enchant.get("permanentEnchant")
                         in get_leg_enchants(game_version)["physical"]
@@ -518,7 +673,9 @@ def get_wowhead_item(id, game_version):
 
     if item_cache.get(str(id)) is None:
         print(f"Requesting item {id} from wowhead")
-        wowhead_response = requests.get(wowhead_link[game_version].replace("ITEMID", str(id)))
+        wowhead_response = requests.get(
+            wowhead_link[game_version].replace("ITEMID", str(id))
+        )
 
         try:
             parsed_xml = xmltodict.parse(wowhead_response.content)

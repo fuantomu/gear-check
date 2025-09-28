@@ -1,10 +1,48 @@
 zones = {
-    1023: {"version": "cataclysm", "min": 346, "max": 372, "gem_primary_min": 40, "gem_secondary_min": 20},  # 25-player BWD/TOFW/BOT
-    1024: {"version": "cataclysm", "min": 346, "max": 372, "gem_primary_min": 40, "gem_secondary_min": 20},  # 10-player BWD/TOFW/BOT
-    1027: {"version": "cataclysm", "min": 372, "max": 391, "gem_primary_min": 40, "gem_secondary_min": 20},  # Firelands
-    1033: {"version": "cataclysm", "min": 384, "max": 410, "gem_primary_min": 40, "gem_secondary_min": 20, "gem_primary_max": 50, "gem_secondary_max": 25},   # Dragon Soul
-    1038: {"version": "mop", "min": 463, "max": 502, "gem_primary_min": 80, "gem_secondary_min": 160}, # Mogu'shan Vaults
-    1040: {"version": "mop", "min": 489, "max": 509, "gem_primary_min": 80, "gem_secondary_min": 160} # Heart of Fear
+    1023: {
+        "version": "cataclysm",
+        "min": 346,
+        "max": 372,
+        "gem_primary_min": 40,
+        "gem_secondary_min": 20,
+    },  # 25-player BWD/TOFW/BOT
+    1024: {
+        "version": "cataclysm",
+        "min": 346,
+        "max": 372,
+        "gem_primary_min": 40,
+        "gem_secondary_min": 20,
+    },  # 10-player BWD/TOFW/BOT
+    1027: {
+        "version": "cataclysm",
+        "min": 372,
+        "max": 391,
+        "gem_primary_min": 40,
+        "gem_secondary_min": 20,
+    },  # Firelands
+    1033: {
+        "version": "cataclysm",
+        "min": 384,
+        "max": 410,
+        "gem_primary_min": 40,
+        "gem_secondary_min": 20,
+        "gem_primary_max": 50,
+        "gem_secondary_max": 25,
+    },  # Dragon Soul
+    1038: {
+        "version": "mop",
+        "min": 463,
+        "max": 502,
+        "gem_primary_min": 80,
+        "gem_secondary_min": 160,
+    },  # Mogu'shan Vaults
+    1040: {
+        "version": "mop",
+        "min": 483,
+        "max": 509,
+        "gem_primary_min": 80,
+        "gem_secondary_min": 160,
+    },  # Heart of Fear
 }
 
 slots = {
@@ -100,7 +138,7 @@ armor_type = {
     "DeathKnight": 4,
     "Shaman": 3,
     "Mage": 1,
-    "Monk": 2
+    "Monk": 2,
 }
 
 locale_armor_type = {1: "Cloth", 2: "Leather", 3: "Mail", 4: "Plate"}
@@ -363,21 +401,11 @@ spec_attributes = {
         "gems": [
             ["sta"],
             ["agi", "mlecritstrkrtng", "rgdcritstrkrtng", "splcritstrkrtng"],
-            ["mlecritstrkrtng", "rgdcritstrkrtng", "splcritstrkrtng"]
-        ]
+            ["mlecritstrkrtng", "rgdcritstrkrtng", "splcritstrkrtng"],
+        ],
     },
-    "Monk-Windwalker": {
-        "mainstat": ["agi"],
-        "gems": [
-            ["agi"]
-        ]
-    },
-    "Monk-Mistweaver": {
-        "mainstat": ["int", "spi"],
-        "gems": [
-            ["int"]
-        ]
-    }
+    "Monk-Windwalker": {"mainstat": ["agi"], "gems": [["agi"]]},
+    "Monk-Mistweaver": {"mainstat": ["int", "spi"], "gems": [["int"]]},
 }
 
 roles = {
@@ -410,7 +438,7 @@ roles = {
         "Beastmastery",
         "Survival",
         "Marksmanship",
-        "Windwalker"
+        "Windwalker",
     ],
     "dps": [
         "Enhancement",
@@ -435,7 +463,7 @@ roles = {
         "Beastmastery",
         "Survival",
         "Marksmanship",
-        "Windwalker"
+        "Windwalker",
     ],
     "melee": [
         "Enhancement",
@@ -448,7 +476,7 @@ roles = {
         "Unholy",
         "Frost",
         "Retribution",
-        "Windwalker"
+        "Windwalker",
     ],
     "ranged": ["Beastmastery", "Survival", "Marksmanship"],
     "healer": ["Restoration", "Holy", "Discipline", "Mistweaver"],
@@ -465,89 +493,87 @@ class_types = {
         "Assassination",
         "Combat",
         "Subtlety",
-        "Windwalker"
+        "Windwalker",
     ],
 }
 
 spec_stats = {"Guardian": "agility"}
 
-jewelcrafting_gem_count = {
-    "cataclysm": 3,
-    "mop": 2
-}
+jewelcrafting_gem_count = {"cataclysm": 3, "mop": 2}
 
-def get_leatherworking_enchants(version: str)-> dict:
+
+def get_leatherworking_enchants(version: str) -> dict:
     match version:
         case "cataclysm":
-            return {
-                "legs": [4439, 4440],
-                "wrists": [4189, 4190, 4191, 4192]
-            }
+            return {"legs": [4439, 4440], "wrists": [4189, 4190, 4191, 4192]}
         case "mop":
-            return {
-                "legs": [4881,4882,4880],
-                "wrists": [4875,4879,4878,4877]
-            }
+            return {"legs": [4881, 4882, 4880], "wrists": [4875, 4879, 4878, 4877]}
         case _:
-            return {
-                "legs": [],
-                "wrists": []
-            }
-        
+            return {"legs": [], "wrists": []}
+
+
 def get_tailoring_enchants(version: str) -> dict:
     match version:
         case "cataclysm":
-            return {
-                "legs": [4113, 4114],
-                "cloak": [4115, 4116, 4118]
-            }
+            return {"legs": [4113, 4114], "cloak": [4115, 4116, 4118]}
         case "mop":
-            return {
-                "legs": [4896,4895],
-                "cloak": [4893,4892,4894]
-            }
+            return {"legs": [4896, 4895], "cloak": [4893, 4892, 4894]}
         case _:
-            return {
-                "legs": [],
-                "cloak": []
-            }
-        
-def get_inscription_enchants(version: str)-> dict:
+            return {"legs": [], "cloak": []}
+
+
+def get_inscription_enchants(version: str) -> dict:
+    match version:
+        case "cataclysm":
+            return {"shoulders": [4193, 4194, 4195, 4196]}
+        case "mop":
+            return {"shoulders": [4915, 4912, 4914, 4913]}
+        case _:
+            return {"shoulders": []}
+
+
+def get_alchemy_trinket(version: str) -> list:
+    match version:
+        case "cataclysm":
+            return [58483, 68775, 68776, 68777]
+        case "mop":
+            return [75274]
+        case _:
+            return []
+
+
+def get_leg_enchants(version: str) -> dict:
     match version:
         case "cataclysm":
             return {
-                "shoulders": [4193, 4194, 4195, 4196]
+                "leatherworking": [4127, 4126, 4270],  # leatherworking created enchants
+                "caster": [
+                    4109,
+                    4110,
+                    4111,
+                    4112,
+                    4113,
+                    4114,
+                ],  # all existing caster enchants
+                "tailoring": [4110, 4112],  # tailoring created enchants
+                "physical": [
+                    4122,
+                    4124,
+                    4126,
+                    4127,
+                    4126,
+                    4270,
+                    4438,
+                    4439,
+                    4440,
+                ],  # all existing physical enchants
             }
         case "mop":
             return {
-                "shoulders": [4915,4912,4914,4913]
+                "leatherworking": [4823, 4824, 4822],
+                "caster": [4825, 4826, 5003, 5004, 4896, 4895],
+                "tailoring": [4825, 4826],
+                "physical": [4823, 4824, 4822, 4881, 4882, 4880, 4872, 4871, 4870],
             }
         case _:
-            return {
-                "shoulders": []
-            }
-        
-def get_alchemy_trinket(version: str) -> list:
-    match version:
-        case "cataclysm": return [58483, 68775, 68776, 68777]
-        case "mop": return [75274]
-        case _: return []
-
-def get_leg_enchants(version: str)-> dict:
-    match version:
-        case "cataclysm": return {
-            "leatherworking": [4127, 4126, 4270], # leatherworking created enchants
-            "caster": [4109, 4110, 4111, 4112, 4113, 4114], # all existing caster enchants
-            "tailoring": [4110, 4112], # tailoring created enchants
-            "physical": [4122, 4124, 4126, 4127, 4126, 4270, 4438, 4439, 4440] # all existing physical enchants
-        }
-        case "mop": return {
-            "leatherworking": [4823,4824,4822],
-            "caster": [4825, 4826,5003, 5004, 4896, 4895],
-            "tailoring": [4825, 4826],
-            "physical": [4823,4824,4822,4881,4882,4880,4872,4871,4870]
-        }
-        case _: return {
-            "physical": [],
-            "caster": []
-        }
+            return {"physical": [], "caster": []}
