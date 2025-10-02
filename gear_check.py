@@ -78,6 +78,7 @@ def check_gear(character, zone):
     spec = character["specs"][0]
     gear = character["combatantInfo"]["gear"]
     meta = None
+    sha_gem = None
     for item in gear:
         found_items[item["slot"]] = item["id"]
         if item["slot"] in ignore_slots[game_version] or item["id"] == 0:
@@ -310,6 +311,9 @@ def check_gear(character, zone):
         for gem in item_stats["gems"]:
             gem_stats = get_wowhead_item(gem["id"], game_version)
 
+            if gem_stats["subclass"] == 9:
+                sha_gem = True
+
             if "meta" in gem_stats.keys():
                 meta = gem_stats
                 continue
@@ -356,18 +360,6 @@ def check_gear(character, zone):
                         output[
                             "major"
                         ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a gem that is not their primary stat ({gem_stats['name']})\n"
-                    # else:
-                    #     attribute_string = " & ".join(
-                    #         set(
-                    #             [
-                    #                 attribute_locale.get(attr)
-                    #                 for attr in total_attributes
-                    #             ]
-                    #         )
-                    #     )
-                    #     output[
-                    #         "minor"
-                    #     ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has a non-optimal gem ({attribute_string})\n"
 
                 # Add color of gem to total sockets
                 for color in gem_class[gem_stats["subclass"]]:
@@ -521,9 +513,23 @@ def check_gear(character, zone):
 
         # Check if socketed gem amount is equal to socket amount in item
         if len(item_stats["gems"]) < item_stats.get("nsockets", 0):
+            if game_version == "mop" and item_stats["slot"] in [15, 16] and not sha_gem:
+                output["extreme"] += f"Gear does not have a Sha gem\n"
+            else:
+                output[
+                    "extreme"
+                ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has {item_stats['nsockets']-len(item_stats['gems'])} empty socket(s)\n"
+
+        # Check if extra socket in Sha/ToT/SoO weapon
+        if (
+            game_version == "mop"
+            and item_stats["slot"] in [15, 16]
+            and item_stats["class"] not in [4]
+            and len(item_stats["gems"]) < item_stats.get("nsockets", 0) + 1
+        ):
             output[
                 "extreme"
-            ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) has {item_stats['nsockets']-len(item_stats['gems'])} empty socket(s)\n"
+            ] += f"{item_stats['name']} ({slots[item_stats['slot']]}) does not have the extra socket\n"
 
         # Find blacksmithing sockets in bracers/gloves
         if item_stats["slot"] in [8, 9]:
