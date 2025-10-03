@@ -1,4 +1,5 @@
 from helper.credentials import get_creds
+from helper.functions import post_players
 from helper.getter import get_players, get_unique_players
 from helper.discord import send_discord_post, update_discord_post
 from sheet.gear_sheet import update_gear_sheet
@@ -118,6 +119,9 @@ async def create_sheet(log, gear_log, sheet_title):
             body=user_permission,
             fields="id",
         ).execute()
+
+        await update_discord_post(f"Parsing players to database")
+        post_players([(player["name"], player["server"]) for player in unique_players])
 
         await update_discord_post(
             f"Finished processing cutsheet for {len(players)} player(s)"

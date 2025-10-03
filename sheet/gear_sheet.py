@@ -1,6 +1,7 @@
 from gear_check import check_gear, load_enchants
 from helper.credentials import get_creds
-from helper.getter import get_players
+from helper.functions import post_players
+from helper.getter import get_players, get_unique_players
 from helper.discord import send_discord_post, update_discord_post
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
@@ -86,6 +87,14 @@ async def create_gear_sheet(log, gear_log):
             body=user_permission,
             fields="id",
         ).execute()
+
+        await update_discord_post(f"Parsing players to database")
+        post_players(
+            [
+                (player["name"], player["server"])
+                for player in get_unique_players(players)
+            ]
+        )
 
         await update_discord_post(
             f"Finished processing gear of {len(players)} player(s)"

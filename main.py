@@ -2,9 +2,14 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
-from helper.functions import get_formatted_time
+from helper.functions import get_formatted_time, post_players
 from helper.log import get_log, get_log_summary
-from helper.getter import filter_fights, get_boss_fights, get_players
+from helper.getter import (
+    filter_fights,
+    get_boss_fights,
+    get_players,
+    get_unique_players,
+)
 from helper.discord import check_message, set_context, set_current_message
 import sys
 import asyncio
@@ -12,7 +17,8 @@ from sheet.cut_sheet import create_sheet
 from sheet.gear_sheet import create_gear_sheet, update_gear_sheet
 from sheet.mechanics_sheet import create_mechanics_sheet
 
-load_dotenv(override=True)
+load_dotenv(".env")
+load_dotenv(".env.local", override=True)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -33,7 +39,6 @@ async def cutsheet(ctx, arg, role=None):
         await ctx.followup.send(log["error"])
     else:
         gear_log = get_log_summary(arg)
-        # buff_log = get_log_buffs(arg)
         await create_sheet(log, gear_log, "Cuts")
 
         if role is not None:
@@ -58,7 +63,6 @@ async def gearcheck(ctx, arg, role=None):
         await ctx.followup.send(log["error"])
     else:
         gear_log = get_log_summary(arg)
-        # buff_log = get_log_buffs(arg)
         await create_gear_sheet(log, gear_log)
 
         if role is not None:
@@ -145,6 +149,7 @@ async def on_application_command_error(
 #     log_data = requests.get(f'{warcraft_logs_url}tables/buffs/{report}?start=0&end=999999999999&abilityid={guild_flask_id}&by=target&api_key={os.getenv("WCL_USERID")}')
 #     return log_data.json()
 
+
 if __name__ == "__main__":
     # get_wcl_oauth()
     if len(sys.argv) < 2:
@@ -159,6 +164,12 @@ if __name__ == "__main__":
         loop = asyncio.get_event_loop()
 
         players = get_players(gear_log)
+        post_players(
+            [
+                (player["name"], player["server"])
+                for player in get_unique_players(players)
+            ]
+        )
 
         issues = loop.run_until_complete(
             update_gear_sheet(None, None, players, log.get("zone"))
