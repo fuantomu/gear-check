@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 from helper.consts import *
 import os
 
-load_dotenv(override=True)
+load_dotenv(".env")
+load_dotenv(".env.local", override=True)
 
 ignore_slots = {"cataclysm": [3, 18], "mop": [3, 17, 18]}
 ignore_enchant = {
@@ -600,7 +601,7 @@ def check_gear(character, zone):
                 )
                 output[
                     "major"
-                ] += f"Gear missing {3-profession[1]['found']} jewelcrafting gem(s) (only found gem(s) in {item_text})\n"
+                ] += f"Gear missing {jewelcrafting_gem_count[game_version]-profession[1]['found']} jewelcrafting gem(s) (only found gem(s) in {item_text})\n"
             if profession[0] == "engineering" and profession[1]["found"] < 2:
                 output["major"] += ",".join(
                     [
